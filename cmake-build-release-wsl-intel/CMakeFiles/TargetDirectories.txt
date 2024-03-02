@@ -1,4 +1,0 @@
-/home/vt/git_target/hpa-2110452-min-dom-set/cmake-build-release-wsl-intel/CMakeFiles/program.dir
-/home/vt/git_target/hpa-2110452-min-dom-set/cmake-build-release-wsl-intel/CMakeFiles/benchmark.dir
-/home/vt/git_target/hpa-2110452-min-dom-set/cmake-build-release-wsl-intel/CMakeFiles/edit_cache.dir
-/home/vt/git_target/hpa-2110452-min-dom-set/cmake-build-release-wsl-intel/CMakeFiles/rebuild_cache.dir

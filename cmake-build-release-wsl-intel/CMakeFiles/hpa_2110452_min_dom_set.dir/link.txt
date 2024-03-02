@@ -1,1 +1,0 @@
-/opt/intel/oneapi/compiler/2024.0/bin/icpx -O3 -DNDEBUG CMakeFiles/hpa_2110452_min_dom_set.dir/main.cpp.o -o hpa_2110452_min_dom_set 
