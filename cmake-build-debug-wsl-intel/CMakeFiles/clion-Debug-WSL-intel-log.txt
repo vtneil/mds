@@ -1,0 +1,4 @@
+C:\Windows\system32\wsl.exe --distribution Ubuntu-22.04 --exec /bin/bash -c "export CMAKE_COLOR_DIAGNOSTICS=ON && export CLION_IDE=TRUE && export JETBRAINS_IDE=TRUE && cd /home/vt/git_target/hpa-2110452-min-dom-set/cmake-build-debug-wsl-intel && /usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/opt/intel/oneapi/compiler/2024.0/bin/icx -DCMAKE_CXX_COMPILER=/opt/intel/oneapi/compiler/2024.0/bin/icpx -G 'CodeBlocks - Unix Makefiles' -S /home/vt/git_target/hpa-2110452-min-dom-set -B /home/vt/git_target/hpa-2110452-min-dom-set/cmake-build-debug-wsl-intel"
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/vt/git_target/hpa-2110452-min-dom-set/cmake-build-debug-wsl-intel
