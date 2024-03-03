@@ -2,21 +2,13 @@
 #include "macros_bootstrap.h"
 #include "builtins_bootstrap.h"
 #include "utils.h"
+#include "container.h"
+
+using aligned_int = container::aligned_t<int, 128>;
+
+constexpr size_t Size = sizeof(aligned_int);
 
 
 int main() {
-
-    int x, y;
-
-    std::cin >> x;
-
-    utils::io::println("x is ", x, builtin::endl);
-
-    if (LIKELY(x > 0)) {
-        y = 20;
-    } else {
-        y = 50;
-    }
-
-    return y & 0xFF;
+    io::println(Size);
 }

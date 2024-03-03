@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace utils::io {
+namespace io {
     void print() {}
 
     template<typename T, typename... Ts>
@@ -17,7 +17,7 @@ namespace utils::io {
     }
 
     template<typename T, typename... Ts>
-    NO_INLINE void println(const T &val, const Ts &... vals) {
+    void println(const T &val, const Ts &... vals) {
         print(val, vals...);
         println();
     }

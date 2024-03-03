@@ -3,7 +3,12 @@ project(hpa_2110452_min_dom_set)
 
 # Variables
 set(c_cpp_std 17)
-set(opt_base_compile_flags "-O3;-march=native;-v")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(opt_compile_opt "-O3")
+else ()
+    set(opt_compile_opt "-O0")
+endif ()
+set(opt_base_compile_flags "${opt_compile_opt};-march=native;-v")
 set(omp_flag "-fopenmp")
 
 # C/C++ Language Standard

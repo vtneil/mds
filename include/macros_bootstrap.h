@@ -1,6 +1,9 @@
 #ifndef MACROS_BOOTSTRAP_H
 #define MACROS_BOOTSTRAP_H
 
+// C++ Aligned
+#define ALIGNED(ALIGNMENT)  __attribute__((aligned(ALIGNMENT)))
+
 // C++ Inline
 #define INLINE              __inline
 
