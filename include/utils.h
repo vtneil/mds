@@ -4,6 +4,8 @@
 #include <iostream>
 
 namespace io {
+    constexpr const char *endl = "\n";
+
     void print() {}
 
     template<typename T, typename... Ts>
@@ -13,13 +15,17 @@ namespace io {
     }
 
     inline void println() {
-        std::cout << std::endl;
+        std::cout << endl;
     }
 
     template<typename T, typename... Ts>
     void println(const T &val, const Ts &... vals) {
         print(val, vals...);
         println();
+    }
+
+    void untie() {
+
     }
 }
 

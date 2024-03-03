@@ -21,12 +21,16 @@ set(sources
         ""
 )
 
-add_executable(program ${sources} main.cpp)
-target_compile_options(program PRIVATE
-        ${opt_base_compile_flags}
-)
+# Functions
+function(new_target target_name target_file)
+    add_executable(${target_name} ${sources} ${target_file})
+    target_compile_options(${target_name} PRIVATE
+            ${opt_base_compile_flags} ${ARGN}
+    )
+endfunction()
 
-add_executable(benchmark ${sources} bench.cpp)
-target_compile_options(benchmark PRIVATE
-        ${opt_base_compile_flags}
-)
+# Targets
+new_target(program main.cpp)
+new_target(benchmark bench.cpp)
+new_target(naive naive.cpp)
+new_target(test main.cpp ${omp_flag} "-DD1;-DD2;-DD3")
