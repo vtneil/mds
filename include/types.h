@@ -13,12 +13,12 @@ namespace types {
     template<typename Tp>
     FORCE_INLINE constexpr bool is_const() { return ported::_impl::i_is_const<Tp>::value; }
 
-    template<typename Tp, size_type Alignment>
+    template<typename Tp, size_t Alignment>
     struct ALIGNED(Alignment) aligned_t {
         Tp value;
     };
 
-    template<typename Tp, size_type Size>
+    template<typename Tp, size_t Size>
     using static_array = Tp[Size];
 
     template<typename Tp>

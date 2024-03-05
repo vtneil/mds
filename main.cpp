@@ -6,30 +6,28 @@
 #include "container.h"
 #include "allocator.h"
 
-#define SIZE (4096UL)
-
-using array1d_t = container::array_t<int, SIZE>;
-using array2d_t = container::array_t<array1d_t, SIZE>;
+constexpr size_t REGION_SIZE = 8UL * 1024UL * 1024UL;  // 8 MiB
+using region_t = memory::virtual_stack_region_t<REGION_SIZE>;
 
 int main(int argc, types::pointer<types::pointer<char>> argv) {
-    int sum = 0;
+    io::unsync_stdio();
 
-    array2d_t array2d;
+    using T = types::aligned_t<char, 2>;
 
-    io::println(sizeof(array1d_t));
-    io::println(sizeof(array2d_t));
+    region_t stack;
+    stack.info();
 
-    for (types::size_type i = 0; i < SIZE; ++i) {
-        for (types::size_type j = 0; j < SIZE; ++j) {
-            array2d[i][j] = i + j;
-        }
-    }
+    auto n1 = stack.allocate<T>(3);
+    stack.info();
 
-    for (types::size_type i = 0; i < SIZE; ++i) {
-        sum += array2d[i].sum();
-    }
+    auto n2 = stack.allocate<T>(3);
+    stack.info();
 
-    io::println(sum);
+    stack.deallocate<T>(128);
+    stack.info();
+
+    stack.clear();
+    stack.info();
 
     return 0;
 }

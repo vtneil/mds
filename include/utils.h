@@ -28,19 +28,20 @@ namespace io {
 
     FORCE_INLINE void unsync_stdio() {
         std::ios_base::sync_with_stdio(false);
+        std::cin.tie(nullptr);
     }
 
     template<bool Cond>
-    FORCE_INLINE constexpr const char *static_str() {
+    FORCE_INLINE constexpr types::pointer_to_const<char> static_str() {
         return "true";
     }
 
     template<>
-    FORCE_INLINE constexpr const char *static_str<false>() {
+    FORCE_INLINE constexpr types::pointer_to_const<char> static_str<false>() {
         return "false";
     }
 
-    FORCE_INLINE const char *to_str(bool value) {
+    FORCE_INLINE constexpr types::pointer_to_const<char> to_str(bool value) {
         return value ? "true" : "false";
     }
 }
@@ -48,12 +49,22 @@ namespace io {
 namespace memory {
     template<typename R = void, typename Tp>
     FORCE_INLINE constexpr auto addressof(types::reference<Tp> value) {
-        return static_cast<types::pointer<R>>(&value);
+        return reinterpret_cast<types::pointer<R>>(&value);
     }
 
     template<typename R = void, typename Tp>
     FORCE_INLINE constexpr auto addressof(types::const_reference<Tp> value) {
-        return static_cast<types::pointer<const R>>(&value);
+        return reinterpret_cast<types::pointer<const R>>(&value);
+    }
+
+    template<typename Tp, size_t Alignment>
+    FORCE_INLINE constexpr size_t nearest_alignment(size_t n) {
+        return (((n * sizeof(Tp)) + Alignment - 1) / Alignment) * Alignment;
+    }
+
+    template<typename Tp, typename AlignT>
+    FORCE_INLINE constexpr size_t nearest_alignment(size_t n) {
+        return nearest_alignment<Tp, sizeof(AlignT)>(n);
     }
 }
 
