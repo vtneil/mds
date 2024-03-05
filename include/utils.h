@@ -2,14 +2,16 @@
 #define HPA_2110452_MIN_DOM_SET_UTILS_H
 
 #include <iostream>
+#include "builtins_bootstrap.h"
+#include "types.h"
 
 namespace io {
     constexpr const char *endl = "\n";
 
-    void print() {}
+    inline void print() {}
 
     template<typename T, typename... Ts>
-    void print(const T &val, const Ts &... vals) {
+    inline void print(const T &val, const Ts &... vals) {
         std::cout << val;
         print(vals...);
     }
@@ -19,13 +21,39 @@ namespace io {
     }
 
     template<typename T, typename... Ts>
-    void println(const T &val, const Ts &... vals) {
+    inline void println(const T &val, const Ts &... vals) {
         print(val, vals...);
         println();
     }
 
-    void untie() {
+    FORCE_INLINE void unsync_stdio() {
+        std::ios_base::sync_with_stdio(false);
+    }
 
+    template<bool Cond>
+    FORCE_INLINE constexpr const char *static_str() {
+        return "true";
+    }
+
+    template<>
+    FORCE_INLINE constexpr const char *static_str<false>() {
+        return "false";
+    }
+
+    FORCE_INLINE const char *to_str(bool value) {
+        return value ? "true" : "false";
+    }
+}
+
+namespace memory {
+    template<typename R = void, typename Tp>
+    FORCE_INLINE constexpr auto addressof(types::reference<Tp> value) {
+        return static_cast<types::pointer<R>>(&value);
+    }
+
+    template<typename R = void, typename Tp>
+    FORCE_INLINE constexpr auto addressof(types::const_reference<Tp> value) {
+        return static_cast<types::pointer<const R>>(&value);
     }
 }
 
