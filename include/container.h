@@ -75,7 +75,7 @@ namespace container {
         }
     };
 
-    template<typename Tp, types::size_type Size, template<typename> class BaseAllocator = memory::NewAllocator>
+    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class BaseAllocator = memory::NewAllocator>
     struct heap_array_t {
     public:
         using value_type = Tp;
