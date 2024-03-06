@@ -5,48 +5,78 @@
 #include "utils.h"
 
 namespace memory {
-    template<typename Tp, size_t = 0>
-    class NewAllocator {
+    template<template<typename, size_t> class Form, typename Tp, size_t Alignment = sizeof(void *)>
+    class Allocator {
     private:
         using pointer_type = types::pointer<Tp>;
+        using ConcreteAllocator = Form<Tp, Alignment>;
 
     public:
         FORCE_INLINE static pointer_type allocate(const size_t size = 1) {
-            return new Tp[size];
+            return ConcreteAllocator::impl_allocate(size);
         }
 
         FORCE_INLINE static void deallocate(pointer_type object) {
+            ConcreteAllocator::impl_deallocate(object);
+        }
+    };
+
+    template<typename Tp, size_t Alignment = 0>
+    class NewAllocator : public Allocator<NewAllocator, Tp, Alignment> {
+    private:
+        template<template<typename, size_t> class ConcreteAllocator, typename AllocatorTp, size_t AllocatorAlignment>
+        friend
+        class Allocator;
+
+        using pointer_type = types::pointer<Tp>;
+
+    protected:
+        FORCE_INLINE static pointer_type impl_allocate(const size_t size = 1) {
+            return new Tp[size];
+        }
+
+        FORCE_INLINE static void impl_deallocate(pointer_type object) {
             delete[] object;
         }
     };
 
-    template<typename Tp, size_t = 0>
-    class MallocAllocator {
+    template<typename Tp, size_t Alignment = 0>
+    class MallocAllocator : public Allocator<MallocAllocator, Tp, Alignment> {
     private:
+        template<template<typename, size_t> class ConcreteAllocator, typename AllocatorTp, size_t AllocatorAlignment>
+        friend
+        class Allocator;
+
         using pointer_type = types::pointer<Tp>;
 
     public:
-        FORCE_INLINE static pointer_type allocate(const size_t size = 1) {
+        FORCE_INLINE static pointer_type impl_allocate(const size_t size = 1) {
             return static_cast<pointer_type>(malloc(size * sizeof(Tp)));
         }
 
-        FORCE_INLINE static void deallocate(pointer_type object) {
+        FORCE_INLINE static void impl_deallocate(pointer_type object) {
             free(object);
         }
     };
 
     template<typename Tp, size_t Alignment = sizeof(void *)>
-    class AlignedAllocator {
+    class AlignedAllocator : public Allocator<AlignedAllocator, Tp, Alignment> {
     private:
+        template<template<typename, size_t> class ConcreteAllocator, typename AllocatorTp, size_t AllocatorAlignment>
+        friend
+        class Allocator;
+
         using pointer_type = types::pointer<Tp>;
 
     public:
-        FORCE_INLINE static pointer_type allocate(const size_t size = 1) {
+        FORCE_INLINE static pointer_type impl_allocate(const size_t size = 1) {
+            static_assert(false, "Not implemented");
             // todo: Implement aligned allocation
             return static_cast<pointer_type>(malloc(size * sizeof(Tp)));
         }
 
-        FORCE_INLINE static void deallocate(pointer_type object) {
+        FORCE_INLINE static void impl_deallocate(pointer_type object) {
+            static_assert(false, "Not implemented");
             free(object);
         }
     };
@@ -74,7 +104,7 @@ namespace memory {
     private:
         using byte_t = uint8_t;
         using pointer_type = types::pointer<byte_t>;
-        using ByteAllocator = BaseAllocator<byte_t>;
+        using ByteAllocator = Allocator<BaseAllocator, byte_t, Alignment>;
 
         inline static constexpr size_t SizeRequested = NumBytes;
         inline static constexpr size_t SizeActual = nearest_alignment<byte_t, Alignment>(NumBytes);
