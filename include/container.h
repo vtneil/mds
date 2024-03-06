@@ -11,123 +11,93 @@
 #endif
 
 namespace container {
-    template<typename Tp, types::size_type Size>
-    struct array_t {
-        using value_type = Tp;
-        using array_type = types::static_array<Tp, Size>;
-        using reference = types::reference<value_type>;
-        using const_reference = types::const_reference<value_type>;
+    template<template<typename, types::size_type, template<typename, size_t = 0> class> class ArrayForm, typename Tp, types::size_type Size>
+    class array_container_t {
+    private:
+        using ConcreteArray = ArrayForm<Tp, Size, memory::UnusedAllocator>;
 
-        // Data (access this way is the fastest way)
-        array_type data;
+        ConcreteArray &actual() { return *static_cast<ConcreteArray *>(this); }
+
+        ConcreteArray const &actual() const { return *static_cast<ConcreteArray const *>(this); }
+
+    public:
+        using reference = types::reference<Tp>;
+        using const_reference = types::const_reference<Tp>;
 
         // Algorithm
         constexpr Tp sum() const noexcept {
             Tp accumulator{};
 
             for (types::size_type i = 0; i < Size; ++i) {
-                accumulator += data[i];
+                accumulator += actual().data[i];
             }
 
             return accumulator;
         }
 
         constexpr Tp max() const noexcept {
-            Tp max_val{};
+            Tp max_val = actual().data[0];
 
-            for (types::size_type i = 0; i < Size; ++i) {
-                max_val = data[i] > max_val ? data[i] : max_val;
+            for (types::size_type i = 1; i < Size; ++i) {
+                max_val = actual().data[i] > max_val ? actual().data[i] : max_val;
             }
 
             return max_val;
         }
 
         constexpr Tp min() const noexcept {
-            Tp min_val{};
+            Tp min_val = actual().data[0];
 
-            for (types::size_type i = 0; i < Size; ++i) {
-                min_val = data[i] < min_val ? data[i] : min_val;
+            for (types::size_type i = 1; i < Size; ++i) {
+                min_val = actual().data[i] < min_val ? actual().data[i] : min_val;
             }
 
             return min_val;
         }
 
         // Element access
-        FORCE_INLINE CPP17_CONSTEXPR reference operator[](types::size_type index) noexcept {
-            return data[index];
+        [[nodiscard]] FORCE_INLINE CPP17_CONSTEXPR reference operator[](types::size_type index) noexcept {
+            return actual().data[index];
         }
 
-        FORCE_INLINE constexpr const_reference operator[](types::size_type index) const noexcept {
-            return data[index];
+        [[nodiscard]] FORCE_INLINE constexpr const_reference operator[](types::size_type index) const noexcept {
+            return actual().data[index];
         }
 
         // Size
-        FORCE_INLINE constexpr types::size_type capacity() const noexcept {
+        [[nodiscard]] FORCE_INLINE constexpr types::size_type capacity() const noexcept {
             return Size;
         }
 
-        FORCE_INLINE constexpr types::size_type size() const noexcept {
+        [[nodiscard]] FORCE_INLINE constexpr types::size_type size() const noexcept {
             return Size;
         }
 
-        FORCE_INLINE constexpr types::size_type length() const noexcept {
+        [[nodiscard]] FORCE_INLINE constexpr types::size_type length() const noexcept {
             return Size;
         }
     };
 
-    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class BaseAllocator = memory::NewAllocator>
-    struct heap_array_t {
-    public:
-        using value_type = Tp;
-        using array_type = array_t<Tp, Size>;
-        using reference = types::reference<value_type>;
-        using const_reference = types::const_reference<value_type>;
+    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class = memory::UnusedAllocator>
+    struct array_t : public array_container_t<array_t, Tp, Size> {
+        types::static_array<Tp, Size> data;
+    };
 
+
+    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class BaseAllocator = memory::MallocAllocator>
+    struct heap_array_t : public array_container_t<heap_array_t, Tp, Size> {
+        using array_type = array_t<Tp, Size>;
         using array_allocator = BaseAllocator<array_t<Tp, Size>>;
 
-    private:
-        types::pointer<array_type> array_ptr;
-
-    public:
-        types::reference<array_type> &data = *array_ptr;
-
-        heap_array_t() : array_ptr{array_allocator::allocate()} {}
+        types::reference<array_type> &data = *array_allocator::allocate();
 
         ~heap_array_t() {
-            array_allocator::deallocate(array_ptr);
-        }
-
-        constexpr Tp const sum() { return data.sum(); }
-
-        constexpr Tp const max() { return data.max(); }
-
-        constexpr Tp const min() { return data.min(); }
-
-        // Element access
-        FORCE_INLINE CPP17_CONSTEXPR reference operator[](types::size_type index) noexcept {
-            return data[index];
-        }
-
-        FORCE_INLINE constexpr const_reference operator[](types::size_type index) const noexcept {
-            return data[index];
-        }
-
-        // Size
-        FORCE_INLINE constexpr types::size_type capacity() const noexcept {
-            return Size;
-        }
-
-        FORCE_INLINE constexpr types::size_type size() const noexcept {
-            return Size;
-        }
-
-        FORCE_INLINE constexpr types::size_type length() const noexcept {
-            return Size;
+            array_allocator::deallocate(&data);
         }
     };
 
-    template<typename Tp, types::size_type Size>
-    struct deque_t {
+    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class = memory::UnusedAllocator>
+    struct deque_t : public array_container_t<deque_t, Tp, Size>{
         using value_type = Tp;
         using reference = types::reference<value_type>;
         using const_reference = types::const_reference<value_type>;
@@ -136,15 +106,7 @@ namespace container {
         types::size_type pos_front = {};
         types::size_type pos_back = {};
 
-        // Element access
-        FORCE_INLINE CPP17_CONSTEXPR reference operator[](types::size_type index) noexcept {
-            return data[index];
-        }
-
-        FORCE_INLINE constexpr const_reference operator[](types::size_type index) const noexcept {
-            return data[index];
-        }
-
+        // Extended element access
         FORCE_INLINE CPP17_CONSTEXPR reference front() noexcept {
             return data[pos_front];
         }

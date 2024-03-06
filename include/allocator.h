@@ -81,6 +81,28 @@ namespace memory {
         }
     };
 
+    template<typename Tp, size_t Alignment = 0>
+    class UnusedAllocator : public Allocator<UnusedAllocator, Tp, Alignment> {
+    private:
+        template<template<typename, size_t> class ConcreteAllocator, typename AllocatorTp, size_t AllocatorAlignment>
+        friend
+        class Allocator;
+
+        using pointer_type = types::pointer<Tp>;
+
+    public:
+        template<typename ...Args>
+        FORCE_INLINE static pointer_type impl_allocate(Args...) {
+            static_assert(false, "This allocator should not be used in the program.");
+            UNREACHABLE();
+        }
+
+        template<typename ...Args>
+        FORCE_INLINE static void impl_deallocate(Args...) {
+            static_assert(false, "This allocator should not be used in the program.");
+        }
+    };
+
     /**
      * A virtual stack memory region for extended fast stack-like allocation
      * using memory pool technique. It should be substantially faster than using malloc/new if
@@ -104,7 +126,7 @@ namespace memory {
     private:
         using byte_t = uint8_t;
         using pointer_type = types::pointer<byte_t>;
-        using ByteAllocator = Allocator<BaseAllocator, byte_t, Alignment>;
+        using ByteAllocator = BaseAllocator<byte_t, Alignment>;
 
         inline static constexpr size_t SizeRequested = NumBytes;
         inline static constexpr size_t SizeActual = nearest_alignment<byte_t, Alignment>(NumBytes);

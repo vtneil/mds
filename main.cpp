@@ -13,14 +13,19 @@ using region_t = memory::virtual_stack_region_t<REGION_SIZE, REGION_ALIGNMENT, m
 using large_array_t = container::array_t<int, 128UL * 1024UL * 1024UL>;  // 512 MiB
 
 int main(int argc, types::pointer<types::pointer<char>> argv) {
-    io::unsync_stdio();
 
-    region_t stack;
-    stack.info();
+    container::array_t<int, 32> arr;
 
-    auto &arr = stack.allocate<large_array_t>();
-    stack.info();
+    for (int i = 0; i < 32; ++i) {
+        arr[i] = i + 1;
+    }
 
+    for (int i = 0; i < 32; ++i) {
+        io::println(arr[i]);
+    }
+
+    io::println(arr.sum());
+    io::println(arr.min());
     io::println(arr.max());
 
     return 0;
