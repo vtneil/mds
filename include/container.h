@@ -16,9 +16,13 @@ namespace container {
     private:
         using ConcreteArray = ArrayForm<Tp, Size, memory::UnusedAllocator>;
 
-        ConcreteArray &actual() { return *static_cast<ConcreteArray *>(this); }
+        types::reference<ConcreteArray> actual() {
+            return static_cast<types::reference<ConcreteArray>>(*this);
+        }
 
-        ConcreteArray const &actual() const { return *static_cast<ConcreteArray const *>(this); }
+        types::const_reference<ConcreteArray> actual() const {
+            return static_cast<types::const_reference<ConcreteArray>>(*this);
+        }
 
     public:
         using reference = types::reference<Tp>;
@@ -74,16 +78,22 @@ namespace container {
         }
 
         [[nodiscard]] FORCE_INLINE constexpr types::size_type length() const noexcept {
-            return Size;
+            return size();
         }
     };
 
+    /**
+     * Static stack-allocated array container
+     */
     template<typename Tp, types::size_type Size, template<typename, size_t = 0> class = memory::UnusedAllocator>
     struct array_t : public array_container_t<array_t, Tp, Size> {
         types::static_array<Tp, Size> data;
     };
 
 
+    /**
+     * Static heap-allocated array container
+     */
     template<typename Tp, types::size_type Size, template<typename, size_t = 0> class BaseAllocator = memory::MallocAllocator>
     struct heap_array_t : public array_container_t<heap_array_t, Tp, Size> {
         using array_type = array_t<Tp, Size>;
@@ -96,13 +106,28 @@ namespace container {
         }
     };
 
+    /**
+     * Automatic stack/heap allocation selection for static array
+     * based on array's size in bytes (default: 1 MiB)
+     */
+    template<typename Tp,
+            types::size_type Size,
+            template<typename, size_t = 0> class BaseAllocator = memory::MallocAllocator,
+            size_t StackSizeThreshold = 1024UL * 1024UL  // 1 MiB limit
+    >
+    using auto_array_t = logical::conditional<(Size * sizeof(Tp) > StackSizeThreshold),
+            heap_array_t<Tp, Size, BaseAllocator>,
+            array_t<Tp, Size, BaseAllocator>
+    >;
+
     template<typename Tp, types::size_type Size, template<typename, size_t = 0> class = memory::UnusedAllocator>
-    struct deque_t : public array_container_t<deque_t, Tp, Size>{
+    struct deque_t : public array_container_t<deque_t, Tp, Size> {
         using value_type = Tp;
         using reference = types::reference<value_type>;
         using const_reference = types::const_reference<value_type>;
 
         array_t<Tp, Size> data;
+        types::size_type n_elements = {};
         types::size_type pos_front = {};
         types::size_type pos_back = {};
 
@@ -125,6 +150,12 @@ namespace container {
 
         // Deque Modification
         // todo: pop_front, pop_back, push_front, push_back
+
+        // Size
+        // Override
+        [[nodiscard]] FORCE_INLINE constexpr types::size_type size() const noexcept {
+            return n_elements;
+        }
     };
 }
 

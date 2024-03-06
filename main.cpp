@@ -7,26 +7,21 @@
 #include "allocator.h"
 
 constexpr size_t REGION_SIZE = 512UL * 1024UL * 1024UL;  // 512 MiB
-constexpr size_t REGION_ALIGNMENT = 4;
+constexpr size_t REGION_ALIGNMENT = sizeof(void *);
+
 using region_t = memory::virtual_stack_region_t<REGION_SIZE, REGION_ALIGNMENT, memory::MallocAllocator>;
 
-using large_array_t = container::array_t<int, 128UL * 1024UL * 1024UL>;  // 512 MiB
+using large_array_t = container::array_t<int, 128UL * 1024UL * 1024U - 2UL>;  // 512 MiB
+
+region_t stack;
 
 int main(int argc, types::pointer<types::pointer<char>> argv) {
 
-    container::array_t<int, 32> arr;
+    types::reference<large_array_t> arr = stack.allocate_unsafe<large_array_t>(1);
 
-    for (int i = 0; i < 32; ++i) {
-        arr[i] = i + 1;
-    }
+    io::println(memory::addressof(arr));
 
-    for (int i = 0; i < 32; ++i) {
-        io::println(arr[i]);
-    }
-
-    io::println(arr.sum());
-    io::println(arr.min());
-    io::println(arr.max());
+    stack.info();
 
     return 0;
 }

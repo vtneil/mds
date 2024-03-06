@@ -92,13 +92,12 @@ namespace memory {
 
     public:
         template<typename ...Args>
-        FORCE_INLINE static pointer_type impl_allocate(Args...) {
+        static pointer_type impl_allocate(Args...) {
             static_assert(false, "This allocator should not be used in the program.");
-            UNREACHABLE();
         }
 
         template<typename ...Args>
-        FORCE_INLINE static void impl_deallocate(Args...) {
+        static void impl_deallocate(Args...) {
             static_assert(false, "This allocator should not be used in the program.");
         }
     };
@@ -194,11 +193,15 @@ namespace memory {
         FORCE_INLINE void clear() noexcept { sp = bp; }
 
         [[nodiscard]] constexpr size_t size() const noexcept {
-            return memory::addressof<byte_t>(*bp) - memory::addressof<byte_t>(*sp);
+            return bp - sp;
         }
 
         [[nodiscard]] constexpr size_t capacity() const noexcept {
-            return memory::addressof<byte_t>(*bp) - memory::addressof<byte_t>(*region_limit);
+            return bp - region_limit;
+        }
+
+        [[nodiscard]] constexpr size_t remaining() const noexcept {
+            return sp - region_limit;
         }
 
         void info() const noexcept {
@@ -211,13 +214,18 @@ namespace memory {
             io::println("The stack pointer (sp) is at ", memory::addressof(*sp));
             io::println("The region limit is at ", memory::addressof(*region_limit));
             io::println(
-                    "base pointer (bp) - stack pointer (sp) is ",
+                    "Stack max capacity is ",
+                    capacity(),
+                    " bytes"
+            );
+            io::println(
+                    "Stack size consumed is ",
                     size(),
                     " bytes"
             );
             io::println(
-                    "base pointer (bp) - region limit is ",
-                    capacity(),
+                    "Stack remaining capacity is ",
+                    remaining(),
                     " bytes"
             );
             io::println("==================================================");
