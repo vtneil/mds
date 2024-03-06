@@ -12,15 +12,15 @@ using region_t = memory::virtual_stack_region_t<REGION_SIZE>;
 int main(int argc, types::pointer<types::pointer<char>> argv) {
     io::unsync_stdio();
 
-    using T = types::aligned_t<char, 2>;
+    using T = int;
 
     region_t stack;
     stack.info();
 
-    auto n1 = stack.allocate<T>(3);
+    auto n1 = stack.allocate<T>(2000);
     stack.info();
 
-    auto n2 = stack.allocate<T>(3);
+    auto n2 = stack.allocate<T>(500);
     stack.info();
 
     stack.deallocate<T>(128);
