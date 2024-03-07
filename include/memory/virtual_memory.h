@@ -39,13 +39,17 @@ namespace memory {
         pointer_type region_limit;
 
     public:
-        virtual_stack_region_t() : region_limit{ByteAllocator::allocate(SizeActual)} {
+        virtual_stack_region_t() noexcept : region_limit{ByteAllocator::allocate(SizeActual)} {
             bp = region_limit + SizeActual;
             sp = bp;
         }
 
-        ~virtual_stack_region_t() {
+        ~virtual_stack_region_t() noexcept {
             ByteAllocator::deallocate(region_limit);
+        }
+
+        [[nodiscard]] FORCE_INLINE constexpr bool valid() const {
+            return !memory::is_nullptr(region_limit);
         }
 
         template<typename T>
@@ -115,7 +119,7 @@ namespace memory {
             os << "The region alignment is " << Alignment << "\n";
             os << "The number of aligned blocks is " << NumAlignments << "\n";
             os << "The requested size in bytes is " << SizeRequested << "\n";
-            os << "The derived size in bytes is " << SizeActual << "\n";
+            os << "The actual size in bytes is " << SizeActual << "\n";
             os << "The base pointer (bp) is at " << memory::addressof(*arr.bp) << "\n";
             os << "The stack pointer (sp) is at " << memory::addressof(*arr.sp) << "\n";
             os << "The region limit is at " << memory::addressof(*arr.region_limit) << "\n";
