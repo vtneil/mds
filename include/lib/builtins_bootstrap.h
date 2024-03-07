@@ -1,7 +1,7 @@
 #ifndef BUILTINS_BOOTSTRAP_H
 #define BUILTINS_BOOTSTRAP_H
 
-#include "macros_bootstrap.h"
+#include "lib/macros_bootstrap.h"
 
 
 namespace builtin {

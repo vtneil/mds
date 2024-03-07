@@ -1,10 +1,6 @@
 #include <immintrin.h>
 #include <iostream>
-#include "macros_bootstrap.h"
-#include "builtins_bootstrap.h"
-#include "utils.h"
-#include "container.h"
-#include "allocator.h"
+#include "lib_hpa.h"
 
 constexpr size_t REGION_SIZE = 512UL * 1024UL * 1024UL;  // 512 MiB
 constexpr size_t REGION_ALIGNMENT = sizeof(void *);

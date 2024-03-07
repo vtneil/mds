@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <type_traits>
-#include "builtins_bootstrap.h"
-#include "ported_std.h"
+#include "lib/builtins_bootstrap.h"
+#include "lib/ported_std.h"
 
 namespace types {
     using size_type = size_t;
