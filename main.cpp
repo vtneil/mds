@@ -13,11 +13,17 @@ region_t stack;
 
 int main(int argc, types::pointer<types::pointer<char>> argv) {
 
-    types::reference<large_array_t> arr = stack.allocate_unsafe<large_array_t>(1);
+    using array3_t = container::array_t<int, 512>;
+    types::reference<array3_t> arr = stack.allocate_unsafe<array3_t>();
 
-    io::println(memory::addressof(arr));
+    io::println("Array is at address ", memory::addressof(arr));
 
-    stack.info();
+    arr[0] = 9;
+    arr[1] = 8;
+    arr[2] = 1;
+
+    io::println("Array data is ", arr);
+    io::print(stack);
 
     return 0;
 }

@@ -2,6 +2,7 @@
 #define HPA_2110452_MIN_DOM_SET_VIRTUAL_MEMORY_H
 
 #include "memory/allocator.h"
+#include "utils/io.h"
 
 namespace memory {
     /**
@@ -106,31 +107,23 @@ namespace memory {
             return sp - region_limit;
         }
 
-        void info() const noexcept {
-            io::println("==================================================");
-            io::println("The region alignment is ", Alignment);
-            io::println("The number of aligned blocks is ", NumAlignments);
-            io::println("The requested size in bytes is ", SizeRequested);
-            io::println("The actual size in bytes is ", SizeActual);
-            io::println("The base pointer (bp) is at ", memory::addressof(*bp));
-            io::println("The stack pointer (sp) is at ", memory::addressof(*sp));
-            io::println("The region limit is at ", memory::addressof(*region_limit));
-            io::println(
-                    "Stack max capacity is ",
-                    capacity(),
-                    " bytes"
-            );
-            io::println(
-                    "Stack size consumed is ",
-                    size(),
-                    " bytes"
-            );
-            io::println(
-                    "Stack remaining capacity is ",
-                    remaining(),
-                    " bytes"
-            );
-            io::println("==================================================");
+        void info() const noexcept { std::cout << *this; }
+
+        friend std::ostream &
+        operator<<(types::reference<std::ostream> os, types::const_reference<virtual_stack_region_t> &arr) {
+            os << "==================================================\n";
+            os << "The region alignment is " << Alignment << "\n";
+            os << "The number of aligned blocks is " << NumAlignments << "\n";
+            os << "The requested size in bytes is " << SizeRequested << "\n";
+            os << "The derived size in bytes is " << SizeActual << "\n";
+            os << "The base pointer (bp) is at " << memory::addressof(*arr.bp) << "\n";
+            os << "The stack pointer (sp) is at " << memory::addressof(*arr.sp) << "\n";
+            os << "The region limit is at " << memory::addressof(*arr.region_limit) << "\n";
+            os << "Stack max capacity is " << arr.capacity() << " bytes\n";
+            os << "Stack size consumed is " << arr.size() << " bytes\n";
+            os << "Stack remaining capacity is " << arr.remaining() << " bytes\n";
+            os << "==================================================\n";
+            return os;
         }
     };
 }
