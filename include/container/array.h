@@ -69,10 +69,22 @@ namespace container {
             return false;
         }
 
-        // Clear
+        // Modify
         FORCE_INLINE void clear() noexcept {
             for (types::size_type i = 0; i < Size; ++i) {
                 derived().data[i] = 0;
+            }
+        }
+
+        constexpr void fill(Tp value, types::size_type begin, types::size_type end) noexcept {
+            for (; begin < end; ++begin) {
+                derived().data[begin] = value;
+            }
+        }
+
+        constexpr void fill(Tp value, types::pointer<Tp> begin, types::pointer<Tp> end) noexcept {
+            for (; begin < end; ++begin) {
+                derived().data[begin] = value;
             }
         }
 
@@ -264,10 +276,13 @@ namespace container {
         operator<<(types::reference<std::ostream> os, types::const_reference<dynamic_array_container_t> &arr) {
             os << "{";
             types::size_type i = 0;
-            for (; i < arr.size() - 1; ++i) {
-                os << static_cast<Tp>(arr[i]) << ", ";
+            if (arr.size() > 0) {
+                for (; i < arr.size() - 1; ++i) {
+                    os << static_cast<Tp>(arr[i]) << ", ";
+                }
+                os << static_cast<Tp>(arr[i]);
             }
-            os << static_cast<Tp>(arr[i]) << "}";
+            os << "}";
             return os;
         }
     };
