@@ -1,10 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <climits>
+#include "lib_hpa.h"
 
 using namespace std;
 
-using Graph = vector<vector<int>>;
+constexpr size_t deg = 25;
+
+using Edges = vector<int>;
+using Graph = vector<Edges>;
 
 // Function to check if a set of vertices is a dominating set
 bool isDominatingSet(Graph &graph, vector<int> &set) {
@@ -53,16 +57,23 @@ int findSmallestDominatingSet(Graph &graph) {
 int main() {
     // Example graph represented as an adjacency list
     // Graph vertices are 0-indexed
-    Graph graph = {
-            {1, 2},    // Neighbors of vertex 0
-            {0, 3, 4}, // Neighbors of vertex 1
-            {0, 4},    // Neighbors of vertex 2
-            {1, 4},    // Neighbors of vertex 3
-            {1, 2, 3}  // Neighbors of vertex 4
-    };
+    Graph graph = {};
+    for (size_t i = 0; i < deg; ++i) {
+        Edges e;
+        for (size_t j = 0; j < deg; ++j) {
+            e.push_back(j);
+        }
+        graph.push_back(e);
+    }
+
+    int n;
+
+    benchmark::run_measure<1>([&]() -> void {
+        n = findSmallestDominatingSet(graph);
+    });
 
     cout << "The size of the smallest dominating set is: "
-         << findSmallestDominatingSet(graph) << endl;
+         << n << endl;
 
     return 0;
 }

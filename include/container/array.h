@@ -87,19 +87,19 @@ namespace container {
 
         // Iterator
         [[nodiscard]] FORCE_INLINE CPP17_CONSTEXPR types::pointer<Tp> begin() noexcept {
-            return memory::addressof<Tp>(derived().data);
+            return memory::addressof<Tp>(derived().data[0]);
         }
 
         [[nodiscard]] FORCE_INLINE constexpr types::pointer_to_const<Tp> begin() const noexcept {
-            return memory::addressof<Tp>(derived().data);
+            return memory::addressof<Tp>(derived().data[0]);
         }
 
         [[nodiscard]] FORCE_INLINE CPP17_CONSTEXPR types::pointer<Tp> end() noexcept {
-            return memory::addressof<Tp>(derived().data) + Size;
+            return memory::addressof<Tp>(derived().data[0]) + Size;
         }
 
         [[nodiscard]] FORCE_INLINE constexpr types::pointer_to_const<Tp> end() const noexcept {
-            return memory::addressof<Tp>(derived().data) + Size;
+            return memory::addressof<Tp>(derived().data[0]) + Size;
         }
 
         // Capacity
@@ -128,7 +128,7 @@ namespace container {
     };
 
     /**
-     * Static stack-allocated data container
+     * Static region-allocated data container
      */
     template<typename Tp, types::size_type Size, template<typename, size_t = 0> class = memory::UnusedAllocator>
     struct array_t : public array_container_t<array_t, Tp, Size> {
@@ -152,7 +152,7 @@ namespace container {
     };
 
     /**
-     * Automatic stack/heap allocation selection for static data
+     * Automatic region/heap allocation selection for static data
      * based on data's size in bytes (default: 1 MiB)
      */
     template<typename Tp,
@@ -171,21 +171,28 @@ namespace container {
         types::size_type idx = {};
 
         template<typename ...Ts>
-        FORCE_INLINE constexpr void push_back(types::const_reference<Tp> t, types::const_reference<Ts> ...ts) {
-            if (idx < Capacity - 1)
-                push_back_unsafe(t);
-            push_back(ts...);
+        FORCE_INLINE constexpr void push_back(types::const_reference<Ts> ...ts) {
+            push_back({ts...});
+        }
+
+        FORCE_INLINE constexpr void push_back(std::initializer_list<Tp> ts) {
+            for (const auto &t: ts)
+                push_back(t);
         }
 
         FORCE_INLINE constexpr void push_back(types::const_reference<Tp> t) {
-            if (idx < Capacity - 1)
+            if (idx < Capacity)
                 push_back_unsafe(t);
         }
 
         template<typename ...Ts>
-        FORCE_INLINE constexpr void push_back_unsafe(types::const_reference<Tp> t, types::const_reference<Ts> ...ts) {
-            push_back_unsafe(t);
-            push_back_unsafe(ts...);
+        FORCE_INLINE constexpr void push_back_unsafe(types::const_reference<Ts> ...ts) {
+            push_back_unsafe({ts...});
+        }
+
+        FORCE_INLINE constexpr void push_back_unsafe(std::initializer_list<Tp> ts) {
+            for (const auto &t: ts)
+                push_back_unsafe(t);
         }
 
         FORCE_INLINE constexpr void push_back_unsafe(types::const_reference<Tp> t) {
@@ -194,13 +201,13 @@ namespace container {
 
         template<typename ...Ts>
         FORCE_INLINE constexpr void emplace_back(types::const_reference<Ts> ...ts) {
-            if (idx < Capacity - 1)
+            if (idx < Capacity)
                 emplace_back_unsafe(ts...);
         }
 
         template<typename ...Ts>
         FORCE_INLINE constexpr void emplace_back_unsafe(types::const_reference<Ts> ...ts) {
-            data[idx++] = Tp{ts...};
+            push_back_unsafe(Tp{ts...});
         }
 
         FORCE_INLINE constexpr void pop_back() {
@@ -210,6 +217,34 @@ namespace container {
 
         FORCE_INLINE constexpr void pop_back_unsafe() {
             --idx;
+        }
+
+        // Element access
+        [[nodiscard]] FORCE_INLINE CPP17_CONSTEXPR types::reference<Tp>
+        operator[](types::size_type index) noexcept {
+            return data[index];
+        }
+
+        [[nodiscard]] FORCE_INLINE constexpr types::const_reference<Tp>
+        operator[](types::size_type index) const noexcept {
+            return data[index];
+        }
+
+        // Iterator
+        [[nodiscard]] FORCE_INLINE CPP17_CONSTEXPR types::pointer<Tp> begin() noexcept {
+            return memory::addressof<Tp>(data[0]);
+        }
+
+        [[nodiscard]] FORCE_INLINE constexpr types::pointer_to_const<Tp> begin() const noexcept {
+            return memory::addressof<Tp>(data[0]);
+        }
+
+        [[nodiscard]] FORCE_INLINE CPP17_CONSTEXPR types::pointer<Tp> end() noexcept {
+            return memory::addressof<Tp>(data[0]) + idx;
+        }
+
+        [[nodiscard]] FORCE_INLINE constexpr types::pointer_to_const<Tp> end() const noexcept {
+            return memory::addressof<Tp>(data[0]) + idx;
         }
 
         // Capacity
@@ -223,6 +258,17 @@ namespace container {
 
         [[nodiscard]] FORCE_INLINE constexpr types::size_type length() const noexcept {
             return size();
+        }
+
+        friend std::ostream &
+        operator<<(types::reference<std::ostream> os, types::const_reference<dynamic_array_container_t> &arr) {
+            os << "{";
+            types::size_type i = 0;
+            for (; i < arr.size() - 1; ++i) {
+                os << static_cast<Tp>(arr[i]) << ", ";
+            }
+            os << static_cast<Tp>(arr[i]) << "}";
+            return os;
         }
     };
 
@@ -239,7 +285,7 @@ namespace container {
     using heap_dynamic_array_t = dynamic_array_container_t<Tp, Capacity, heap_array_t<Tp, Capacity, ContainerAllocator>>;
 
     /**
-     * Automatic stack/heap allocation selection for dynamic array container with static data
+     * Automatic region/heap allocation selection for dynamic array container with static data
      * based on data's size in bytes (default: 1 MiB)
      */
     template<typename Tp,
