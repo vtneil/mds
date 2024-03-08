@@ -6,40 +6,23 @@ constexpr size_t REGION_SIZE = 512UL * (1024UL * 1024UL);
 constexpr size_t REGION_ALIGNMENT = sizeof(void *);
 
 using Integral = int32_t;
+using Bit = int_fast8_t;
 
-constexpr Integral deg = 4;
+constexpr Integral deg = 20;
 
 using Graph = container::graph_adjacency_list<Integral, deg>;
 using Set = container::dynamic_array_t<Integral, deg>;
-using BitMap = container::array_t<int_fast32_t, deg>;
-using GraphBitMapArr = container::array_t<BitMap, deg>;
-using SubsetBitMapArr = container::array_t<BitMap, 1 << deg>;
+using BitMask = container::array_t<Bit, deg>;
+using GraphBitMaskArr = container::array_t<BitMask, deg>;
+using SubsetBitMaskArr = container::array_t<BitMask, 1ul << deg>;
 
 memory::virtual_stack_region_t<REGION_SIZE, REGION_ALIGNMENT, memory::NewAllocator> glob_region;
 memory::virtual_stack_region_t<REGION_SIZE, REGION_ALIGNMENT, memory::NewAllocator> fast_region;
+types::pointer<GraphBitMaskArr> bmp;
 
-types::pointer<GraphBitMapArr> bmp;
-
-void comb(int N, int K) {
-    std::string bitmask(K, 1); // K leading 1's
-    bitmask.resize(N, 0); // N-K trailing 0's
-
-    // print integers and permute bitmask
-    do {
-        for (int i = 0; i < N; ++i) // [0..N-1] integers
-        {
-            if (!bitmask[i])
-                continue;
-
-            std::cout << " " << i;
-        }
-        std::cout << std::endl;
-    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
-}
-
-types::reference<SubsetBitMapArr> generateSubsetBitMap() {
-    SubsetBitMapArr &subsets = glob_region.allocate<SubsetBitMapArr>();
-    BitMap &bitmask = glob_region.allocate<BitMap>();
+types::reference<SubsetBitMaskArr> display_all_subset_covers() {
+    SubsetBitMaskArr &subsets = glob_region.allocate<SubsetBitMaskArr>();
+    BitMask &bitmask = glob_region.allocate<BitMask>();
     Integral subset_num = 1;
 
     for (Integral k = 1; k <= deg; ++k) {
@@ -62,8 +45,8 @@ types::reference<SubsetBitMapArr> generateSubsetBitMap() {
                 }
             }
 
-//            io::println("num ", subset_num, " size ", subset_size, " with ", current_subset, " : ",
-//                        subsets[subset_num]);
+            io::println("num ", subset_num, " size ", subset_size, " with ", current_subset, " : ",
+                        subsets[subset_num]);
             ++subset_num;
 
             fast_region.deallocate<Set>();
@@ -75,8 +58,8 @@ types::reference<SubsetBitMapArr> generateSubsetBitMap() {
 }
 
 Integral smallest_subset() {
-    SubsetBitMapArr &subsets = glob_region.allocate<SubsetBitMapArr>();
-    BitMap &bitmask = glob_region.allocate<BitMap>();
+    SubsetBitMaskArr &subsets = glob_region.allocate<SubsetBitMaskArr>();
+    BitMask &bitmask = glob_region.allocate<BitMask>();
     Integral subset_num = 1;
 
     for (Integral k = 1; k <= deg; ++k) {
@@ -85,7 +68,7 @@ Integral smallest_subset() {
 
         do {
             Integral subset_size = 0;
-            BitMap &domination = fast_region.allocate<BitMap>();
+            BitMask &domination = fast_region.allocate<BitMask>();
 
             for (Integral i = 0; i < deg; ++i) {
                 if (!bitmask[i])
@@ -103,7 +86,7 @@ Integral smallest_subset() {
 
             ++subset_num;
 
-            fast_region.deallocate<BitMap>();
+            fast_region.deallocate<BitMask>();
 
         } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
     }
@@ -111,24 +94,46 @@ Integral smallest_subset() {
     return 0;
 }
 
-int main() {
+int main(int argc, char **argv) {
+    io::unsync_stdio();
 
     Graph graph = {};
 
-    benchmark::run_measure<1>([&]() -> void {
-        graph.push_nodes(container::graph_node<Integral>{0, {}},
-                         container::graph_node<Integral>{1, {}},
-                         container::graph_node<Integral>{2, {3}},
-                         container::graph_node<Integral>{3, {2}});
+//    // Complete graph (Best case)
+//    benchmark::run_measure<1>([&]() -> void {
 //        for (Integral i = 0; i < deg; ++i) {
 //            for (Integral j = 0; j < deg; ++j) {
 //                graph.push_nodes(container::graph_node<Integral>{i, {j}});
 //            }
 //        }
+//    });
+
+    // Unconnected graph, zero edge (Worst case, check until last)
+    benchmark::run_measure<1>([&]() -> void {
+        for (Integral i = 0; i < deg; ++i) {
+            graph.push_nodes(container::graph_node<Integral>{i, {}});
+        }
     });
 
+//    // Simple path graph
+//    benchmark::run_measure<1>([&]() -> void {
+//        for (Integral i = 0; i < deg - 1; ++i) {
+//            graph.push_nodes(container::graph_node<Integral>{i, {i + 1}});
+//            graph.push_nodes(container::graph_node<Integral>{i + 1, {i}});
+//        }
+//    });
+
+//    // Custom graph
+//    benchmark::run_measure<1>([&]() -> void {
+//        graph.push_nodes(container::graph_node<Integral>{0, {}},
+//                         container::graph_node<Integral>{1, {}},
+//                         container::graph_node<Integral>{2, {3}},
+//                         container::graph_node<Integral>{3, {2}});
+//    });
+
+    // Generate set cover using bitmask
     benchmark::run_measure<1>([&]() -> void {
-        bmp = glob_region.allocate_ptr_unsafe<GraphBitMapArr>();
+        bmp = glob_region.allocate_ptr_unsafe<GraphBitMaskArr>();
         for (Integral vertex = 0; vertex < deg; ++vertex) {
             (*bmp)[vertex][vertex] = 1;
             for (const auto &edge: graph[vertex]) {
@@ -145,6 +150,8 @@ int main() {
     });
 
     io::println("Smallest subset is ", n);
+
+//    display_all_subset_covers();
 
     return 0;
 }

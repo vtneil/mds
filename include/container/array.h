@@ -69,6 +69,10 @@ namespace container {
             return false;
         }
 
+        [[nodiscard]] constexpr bool none() const noexcept {
+            return !any();
+        }
+
         // Modify
         FORCE_INLINE void clear() noexcept {
             for (types::size_type i = 0; i < Size; ++i) {
