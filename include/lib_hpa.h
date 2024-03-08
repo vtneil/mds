@@ -1,10 +1,14 @@
-#ifndef HPA_2110452_MIN_DOM_SET_LIB_HPA_H
-#define HPA_2110452_MIN_DOM_SET_LIB_HPA_H
+#ifndef LIB_HPA_H
+#define LIB_HPA_H
 
 #include "lib/macros_bootstrap.h"
 #include "lib/builtins_bootstrap.h"
 #include "lib/ported_std.h"
 #include "lib/types.h"
+
+#include "utils/io.h"
+#include "utils/pipeline.h"
+#include "utils/benchmark.h"
 
 #include "memory/generic.h"
 #include "memory/allocator.h"
@@ -13,8 +17,6 @@
 #include "container/generic.h"
 #include "container/array.h"
 #include "container/deque.h"
+#include "container/graph.h"
 
-#include "utils/io.h"
-#include "utils/pipeline.h"
-
-#endif //HPA_2110452_MIN_DOM_SET_LIB_HPA_H
+#endif //LIB_HPA_H

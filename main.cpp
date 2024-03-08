@@ -13,10 +13,16 @@ using large_array_t = container::array_t<int, 128UL * 1024UL * 1024U - 2UL>;  //
 region_t stack;
 
 int main(int argc, types::pointer<types::pointer<char>> argv) {
-    if (!stack.valid())
-        return 1;
 
-    io::print(stack);
+    container::adjacency_list<int, 32, 32> adj;
+
+    for (auto &edges: adj.graph_repr) {
+        for (auto &vertex: edges.data) {
+            io::print(vertex, " ");
+        }
+        io::println();
+    }
+    io::println(adj.graph_repr.data[0].data);
 
     return 0;
 }

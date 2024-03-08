@@ -2,6 +2,7 @@
 #define HPA_2110452_MIN_DOM_SET_MEMORY_H
 
 #include <new>
+#include <cstring>
 #include "lib/types.h"
 #include "memory/generic.h"
 
@@ -60,6 +61,27 @@ namespace memory {
         }
     };
 
+    template<typename Tp, size_t Alignment = 0>
+    class MallocClearAllocator : public Allocator<MallocAllocator, Tp, Alignment> {
+    private:
+        template<template<typename, size_t> class ConcreteAllocator, typename AllocatorTp, size_t AllocatorAlignment>
+        friend
+        class Allocator;
+
+        using pointer_type = types::pointer<Tp>;
+
+    public:
+        FORCE_INLINE static pointer_type impl_allocate(const size_t size = 1) noexcept {
+            void *p_mem = malloc(size * sizeof(Tp));
+            memset(p_mem, 0, size * sizeof(Tp));
+            return static_cast<pointer_type>(p_mem);
+        }
+
+        FORCE_INLINE static void impl_deallocate(pointer_type object) noexcept {
+            free(object);
+        }
+    };
+
     template<typename Tp, size_t Alignment = sizeof(void *)>
     class AlignedAllocator : public Allocator<AlignedAllocator, Tp, Alignment> {
     private:
@@ -102,6 +124,9 @@ namespace memory {
             static_assert(false, "This allocator should not be used in the program.");
         }
     };
+
+    template<typename Tp, size_t Alignment = 0>
+    using DefaultAllocator = MallocClearAllocator<Tp, Alignment>;
 
     template<typename Tp>
     FORCE_INLINE constexpr bool is_nullptr(types::pointer<Tp> pointer) {

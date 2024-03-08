@@ -4,8 +4,10 @@
 
 using namespace std;
 
+using Graph = vector<vector<int>>;
+
 // Function to check if a set of vertices is a dominating set
-bool isDominatingSet(vector<vector<int>> &graph, vector<int> &set) {
+bool isDominatingSet(Graph &graph, vector<int> &set) {
     int n = graph.size();
     vector<bool> dominated(n, false);
 
@@ -26,7 +28,7 @@ bool isDominatingSet(vector<vector<int>> &graph, vector<int> &set) {
 }
 
 // Utility function to find the smallest dominating set by checking all subsets
-int findSmallestDominatingSet(vector<vector<int>> &graph) {
+int findSmallestDominatingSet(Graph &graph) {
     int n = graph.size();
     int smallestSize = INT_MAX;
 
@@ -51,7 +53,7 @@ int findSmallestDominatingSet(vector<vector<int>> &graph) {
 int main() {
     // Example graph represented as an adjacency list
     // Graph vertices are 0-indexed
-    vector<vector<int>> graph = {
+    Graph graph = {
             {1, 2},    // Neighbors of vertex 0
             {0, 3, 4}, // Neighbors of vertex 1
             {0, 4},    // Neighbors of vertex 2

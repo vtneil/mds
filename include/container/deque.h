@@ -36,7 +36,7 @@ namespace container {
         // Deque Modification
         // todo: pop_front, pop_back, push_front, push_back
 
-        // Size
+        // Capacity
         // Override
         [[nodiscard]] FORCE_INLINE constexpr types::size_type size() const noexcept {
             return n_elements;

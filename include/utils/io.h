@@ -8,20 +8,20 @@
 namespace io {
     constexpr const char *endl = "\n";
 
-    inline void print() {}
+    void print() {}
 
     template<typename T, typename... Ts>
-    inline void print(const T &val, const Ts &... vals) {
+    void print(const T &val, const Ts &... vals) {
         std::cout << val;
         print(vals...);
     }
 
-    inline void println() {
+    void println() {
         std::cout << endl;
     }
 
     template<typename T, typename... Ts>
-    inline void println(const T &val, const Ts &... vals) {
+    void println(const T &val, const Ts &... vals) {
         print(val, vals...);
         println();
     }

@@ -23,7 +23,7 @@ namespace container {
         using const_reference = types::const_reference<Tp>;
 
         // Algorithm
-        constexpr Tp sum() const noexcept {
+        [[nodiscard]] constexpr Tp sum() const noexcept {
             Tp accumulator{};
 
             for (types::size_type i = 0; i < Size; ++i) {
@@ -33,7 +33,7 @@ namespace container {
             return accumulator;
         }
 
-        constexpr Tp max() const noexcept {
+        [[nodiscard]] constexpr Tp max() const noexcept {
             Tp max_val = derived().data[0];
 
             for (types::size_type i = 1; i < Size; ++i) {
@@ -43,7 +43,7 @@ namespace container {
             return max_val;
         }
 
-        constexpr Tp min() const noexcept {
+        [[nodiscard]] constexpr Tp min() const noexcept {
             Tp min_val = derived().data[0];
 
             for (types::size_type i = 1; i < Size; ++i) {
@@ -51,6 +51,29 @@ namespace container {
             }
 
             return min_val;
+        }
+
+        [[nodiscard]] constexpr bool all() const noexcept {
+            for (types::size_type i = 0; i < Size; ++i) {
+                if (!derived().data[i]) return false;
+            }
+
+            return true;
+        }
+
+        [[nodiscard]] constexpr bool any() const noexcept {
+            for (types::size_type i = 0; i < Size; ++i) {
+                if (derived().data[i]) return true;
+            }
+
+            return false;
+        }
+
+        // Clear
+        FORCE_INLINE void clear() noexcept {
+            for (types::size_type i = 0; i < Size; ++i) {
+                derived().data[i] = 0;
+            }
         }
 
         // Element access
@@ -64,22 +87,22 @@ namespace container {
 
         // Iterator
         [[nodiscard]] FORCE_INLINE CPP17_CONSTEXPR types::pointer<Tp> begin() noexcept {
-            return derived().data;
+            return memory::addressof<Tp>(derived().data);
         }
 
         [[nodiscard]] FORCE_INLINE constexpr types::pointer_to_const<Tp> begin() const noexcept {
-            return derived().data;
+            return memory::addressof<Tp>(derived().data);
         }
 
         [[nodiscard]] FORCE_INLINE CPP17_CONSTEXPR types::pointer<Tp> end() noexcept {
-            return derived().data + Size;
+            return memory::addressof<Tp>(derived().data) + Size;
         }
 
         [[nodiscard]] FORCE_INLINE constexpr types::pointer_to_const<Tp> end() const noexcept {
-            return derived().data + Size;
+            return memory::addressof<Tp>(derived().data) + Size;
         }
 
-        // Size
+        // Capacity
         [[nodiscard]] FORCE_INLINE constexpr types::size_type capacity() const noexcept {
             return Size;
         }
@@ -97,15 +120,15 @@ namespace container {
             os << "{";
             types::size_type i = 0;
             for (; i < Size - 1; ++i) {
-                os << arr[i] << ", ";
+                os << static_cast<Tp>(arr[i]) << ", ";
             }
-            os << arr[i] << "}";
+            os << static_cast<Tp>(arr[i]) << "}";
             return os;
         }
     };
 
     /**
-     * Static stack-allocated array container
+     * Static stack-allocated data container
      */
     template<typename Tp, types::size_type Size, template<typename, size_t = 0> class = memory::UnusedAllocator>
     struct array_t : public array_container_t<array_t, Tp, Size> {
@@ -114,9 +137,9 @@ namespace container {
 
 
     /**
-     * Static heap-allocated array container
+     * Static heap-allocated data container
      */
-    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class BaseAllocator = memory::MallocAllocator>
+    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class BaseAllocator = memory::DefaultAllocator>
     struct heap_array_t : public array_container_t<heap_array_t, Tp, Size> {
         using array_type = array_t<Tp, Size>;
         using array_allocator = BaseAllocator<array_t<Tp, Size>>;
@@ -129,17 +152,104 @@ namespace container {
     };
 
     /**
-     * Automatic stack/heap allocation selection for static array
-     * based on array's size in bytes (default: 1 MiB)
+     * Automatic stack/heap allocation selection for static data
+     * based on data's size in bytes (default: 1 MiB)
      */
     template<typename Tp,
             types::size_type Size,
-            template<typename, size_t = 0> class BaseAllocator = memory::MallocAllocator,
+            template<typename, size_t = 0> class BaseAllocator = memory::DefaultAllocator,
             size_t StackSizeThreshold = 1024UL * 1024UL  // 1 MiB limit
     >
     using auto_array_t = logical::conditional<(Size * sizeof(Tp) > StackSizeThreshold),
             heap_array_t<Tp, Size, BaseAllocator>,
             array_t<Tp, Size, BaseAllocator>
+    >;
+
+    template<typename Tp, types::size_type Capacity, typename ArrayContainer>
+    struct dynamic_array_container_t {
+        ArrayContainer data = {};
+        types::size_type idx = {};
+
+        template<typename ...Ts>
+        FORCE_INLINE constexpr void push_back(types::const_reference<Tp> t, types::const_reference<Ts> ...ts) {
+            if (idx < Capacity - 1)
+                push_back_unsafe(t);
+            push_back(ts...);
+        }
+
+        FORCE_INLINE constexpr void push_back(types::const_reference<Tp> t) {
+            if (idx < Capacity - 1)
+                push_back_unsafe(t);
+        }
+
+        template<typename ...Ts>
+        FORCE_INLINE constexpr void push_back_unsafe(types::const_reference<Tp> t, types::const_reference<Ts> ...ts) {
+            push_back_unsafe(t);
+            push_back_unsafe(ts...);
+        }
+
+        FORCE_INLINE constexpr void push_back_unsafe(types::const_reference<Tp> t) {
+            data[idx++] = t;
+        }
+
+        template<typename ...Ts>
+        FORCE_INLINE constexpr void emplace_back(types::const_reference<Ts> ...ts) {
+            if (idx < Capacity - 1)
+                emplace_back_unsafe(ts...);
+        }
+
+        template<typename ...Ts>
+        FORCE_INLINE constexpr void emplace_back_unsafe(types::const_reference<Ts> ...ts) {
+            data[idx++] = Tp{ts...};
+        }
+
+        FORCE_INLINE constexpr void pop_back() {
+            if (idx > 0)
+                pop_back_unsafe();
+        }
+
+        FORCE_INLINE constexpr void pop_back_unsafe() {
+            --idx;
+        }
+
+        // Capacity
+        [[nodiscard]] FORCE_INLINE constexpr types::size_type capacity() const noexcept {
+            return Capacity;
+        }
+
+        [[nodiscard]] FORCE_INLINE constexpr types::size_type size() const noexcept {
+            return idx;
+        }
+
+        [[nodiscard]] FORCE_INLINE constexpr types::size_type length() const noexcept {
+            return size();
+        }
+    };
+
+    template<typename Tp,
+            types::size_type Capacity,
+            template<typename, size_t> class ContainerAllocator = memory::UnusedAllocator
+    >
+    using dynamic_array_t = dynamic_array_container_t<Tp, Capacity, array_t<Tp, Capacity, ContainerAllocator>>;
+
+    template<typename Tp,
+            types::size_type Capacity,
+            template<typename, size_t> class ContainerAllocator = memory::DefaultAllocator
+    >
+    using heap_dynamic_array_t = dynamic_array_container_t<Tp, Capacity, heap_array_t<Tp, Capacity, ContainerAllocator>>;
+
+    /**
+     * Automatic stack/heap allocation selection for dynamic array container with static data
+     * based on data's size in bytes (default: 1 MiB)
+     */
+    template<typename Tp,
+            types::size_type Size,
+            template<typename, size_t = 0> class BaseAllocator = memory::DefaultAllocator,
+            size_t StackSizeThreshold = 1024UL * 1024UL  // 1 MiB limit
+    >
+    using auto_dynamic_array_t = logical::conditional<(Size * sizeof(Tp) > StackSizeThreshold),
+            heap_dynamic_array_t<Tp, Size, BaseAllocator>,
+            dynamic_array_t<Tp, Size, BaseAllocator>
     >;
 }
 
