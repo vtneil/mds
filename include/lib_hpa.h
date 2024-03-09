@@ -21,5 +21,6 @@
 #include "container/array.h"
 #include "container/deque.h"
 #include "container/graph.h"
+#include "container/bitset.h"
 
 #endif //LIB_HPA_H

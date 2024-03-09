@@ -13,11 +13,10 @@ using Bit = int8_t;
 constexpr Integral::type MAX_VERTEX = 24;
 
 using CombBitMask = container::array_t<Bit, MAX_VERTEX>;
-using BaseBitMask = std::bitset<MAX_VERTEX>;
-using BitMask = types::aligned_t<BaseBitMask, VECTOR_WIDTH>;
+using BitMask = container::bitset_t<MAX_VERTEX, int>;
 using Graph = container::graph_adjacency_list<Integral, MAX_VERTEX, MAX_VERTEX,
         container::array_t, container::dynamic_array_t, container::array_t,
-        memory::NewAllocator, VECTOR_WIDTH>;
+        memory::NewAllocator>;
 
 //using Set = container::dynamic_array_t<Integral, MAX_VERTEX>;
 //using SubsetBitMaskArr = container::array_t<BitMask, 1ul << MAX_VERTEX>;
@@ -29,17 +28,17 @@ inline constexpr void bitset_or(T &dst, const T &src) {
     dst |= src;
 }
 
-inline void bitset_or_simd(void *dst, const void *src) {
-    auto *b_dst = reinterpret_cast<__m256i *>(dst);
-    auto *b_src = reinterpret_cast<const __m256i *>(src);
-
-    for (size_t i = 0; i < sizeof(BitMask) / VECTOR_WIDTH; ++i) {
-        __m256i v_dst = _mm256_load_si256(b_dst + i);
-        __m256i v_src = _mm256_load_si256(b_src + i);
-        v_dst = _mm256_or_si256(v_dst, v_src);
-        _mm256_store_si256(reinterpret_cast<__m256i *>(b_dst) + i, v_dst);
-    }
-}
+//inline void bitset_or_simd(void *dst, const void *src) {
+//    auto *b_dst = reinterpret_cast<__m256i *>(dst);
+//    auto *b_src = reinterpret_cast<const __m256i *>(src);
+//
+//    for (size_t i = 0; i < sizeof(BitMask) / VECTOR_WIDTH; ++i) {
+//        __m256i v_dst = _mm256_load_si256(b_dst + i);
+//        __m256i v_src = _mm256_load_si256(b_src + i);
+//        v_dst = _mm256_or_si256(v_dst, v_src);
+//        _mm256_store_si256(reinterpret_cast<__m256i *>(b_dst) + i, v_dst);
+//    }
+//}
 
 Integral::type smallest_subset(const Graph &graph) {
     // Iterate through all subsets from smallest to largest and return immediately once the subset is dominating.
@@ -59,12 +58,12 @@ Integral::type smallest_subset(const Graph &graph) {
                 ++subset_size;
 
                 // Graph cover is implicitly created during graph construction
-                bitset_or(domination.value, graph.cover[i].value);
-//                bitset_or_simd(&domination, &graph.cover[i]);
+                bitset_or(domination, graph.cover[i]);
             }
 
-            if (LIKELY(domination.value.all()))
+            if (LIKELY(domination.all())) {
                 return subset_size;
+            }
 
             fast_region.deallocate_unsafe<BitMask>();
 

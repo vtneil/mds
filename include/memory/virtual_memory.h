@@ -54,12 +54,12 @@ namespace memory {
 
         template<typename T>
         [[nodiscard]] inline types::pointer<T> construct_ptr(size_t n = 1) noexcept {
-            return new(allocate_ptr<T>(n)) T[n];
+            return new(allocate_ptr<T>(n)) T[n]();
         }
 
         template<typename T>
         [[nodiscard]] inline types::pointer<T> construct_ptr_unsafe(size_t n = 1) noexcept {
-            return new(allocate_ptr_unsafe<T>(n)) T[n];
+            return new(allocate_ptr_unsafe<T>(n)) T[n]();
         }
 
         template<typename T>
