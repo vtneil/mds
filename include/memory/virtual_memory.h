@@ -26,7 +26,7 @@ namespace memory {
     template<size_t NumBytes, size_t Alignment = 8, template<typename, size_t = 0> class BaseAllocator = MallocAllocator>
     class virtual_stack_region_t {
     private:
-        using byte_t = uint8_t;
+        using byte_t = int8_t;
         using pointer_type = types::pointer<byte_t>;
         using ByteAllocator = BaseAllocator<byte_t, Alignment>;
 
