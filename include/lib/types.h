@@ -15,7 +15,16 @@ namespace types {
 
     template<typename Tp, size_t Alignment>
     struct ALIGNED(Alignment) aligned_t {
-        Tp value;
+        using type = Tp;
+
+        type value;
+    };
+
+    template<typename Tp, size_t = 0>
+    struct default_aligned_t {
+        using type = Tp;
+
+        type value;
     };
 
     template<typename Tp, size_t Size>

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-constexpr size_t deg = 25;
+constexpr size_t MAX_VERTEX = 25;
 
 using Edges = vector<int>;
 using Graph = vector<Edges>;
@@ -58,9 +58,9 @@ int main() {
     // Example graph represented as an adjacency list
     // Graph vertices are 0-indexed
     Graph graph = {};
-    for (size_t i = 0; i < deg; ++i) {
+    for (size_t i = 0; i < MAX_VERTEX; ++i) {
         Edges e;
-        for (size_t j = 0; j < deg; ++j) {
+        for (size_t j = 0; j < MAX_VERTEX; ++j) {
             e.push_back(j);
         }
         graph.push_back(e);

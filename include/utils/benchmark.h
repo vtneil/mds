@@ -5,7 +5,7 @@
 
 namespace benchmark {
     template<size_t Count = 1, typename Proc>
-    auto measure(Proc procedure) {
+    auto measure(Proc procedure, const char *procedure_name = "") {
         auto start = std::chrono::high_resolution_clock::now();
         for (size_t i = 0; i < Count; ++i)
             (void) procedure();
@@ -16,9 +16,9 @@ namespace benchmark {
     }
 
     template<size_t Count = 1, typename Proc>
-    auto run_measure(Proc procedure) {
+    auto run_measure(Proc procedure, const char *procedure_name = "") {
         auto dt = measure<Count>(procedure);
-        io::println("Time taken for procedure: ", dt, " microseconds.");
+        io::println("Time taken for procedure \"", procedure_name, "\": ", dt, " microseconds.");
     }
 
     // todo: implement measure for various inputs

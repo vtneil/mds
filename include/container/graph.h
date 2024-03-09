@@ -45,7 +45,7 @@ namespace container {
         }
 
         constexpr void push_nodes(types::const_reference<graph_node<Integral>> node) {
-            graph_repr[node.vertex].push_back(node.edges);
+            graph_repr[node.vertex.value].push_back(node.edges);
         }
 
         // Element access
