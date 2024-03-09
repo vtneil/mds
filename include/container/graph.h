@@ -28,12 +28,13 @@ namespace container {
             template<typename, types::size_type, template<typename, size_t = 0> class> class VertexArrayContainer = container::heap_array_t,
             template<typename, types::size_type, template<typename, size_t = 0> class> class EdgesArrayContainer = container::heap_dynamic_array_t,
             template<typename, types::size_type, template<typename, size_t = 0> class> class SetCoverArrayContainer = container::heap_array_t,
-            template<typename, size_t = 0> class Allocator = memory::NewAllocator
+            template<typename, size_t = 0> class Allocator = memory::NewAllocator,
+            size_t BitSetAlignment = sizeof(void *)
     >
     struct graph_adjacency_list {
         using edges_container_t = EdgesArrayContainer<Integral, NumEdgePerVertex, Allocator>;
         using graph_container_t = VertexArrayContainer<edges_container_t, NumVertex, Allocator>;
-        using set_cover_t = SetCoverArrayContainer<std::bitset<NumEdgePerVertex>, NumVertex, Allocator>;
+        using set_cover_t = SetCoverArrayContainer<types::aligned_t<std::bitset<NumEdgePerVertex>, BitSetAlignment>, NumVertex, Allocator>;
 
         graph_container_t list = {};
         set_cover_t cover = {};
@@ -50,9 +51,9 @@ namespace container {
 
         constexpr void push_nodes(types::const_reference<graph_node<Integral>> node) {
             list[node.vertex.value].push_back(node.edges);
-            cover[node.vertex.value][node.vertex.value] = true;
+            cover[node.vertex.value].value[node.vertex.value] = true;
             for (const auto &edge: node.edges) {
-                cover[node.vertex.value][edge.value] = true;
+                cover[node.vertex.value].value[edge.value] = true;
             }
         }
 

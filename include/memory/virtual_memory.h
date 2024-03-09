@@ -39,7 +39,7 @@ namespace memory {
         pointer_type region_limit;
 
     public:
-        virtual_stack_region_t() noexcept : region_limit{ByteAllocator::allocate(SizeActual)} {
+        virtual_stack_region_t() noexcept: region_limit{ByteAllocator::allocate(SizeActual)} {
             bp = region_limit + SizeActual;
             sp = bp;
         }
@@ -53,6 +53,26 @@ namespace memory {
         }
 
         template<typename T>
+        [[nodiscard]] inline types::pointer<T> construct_ptr(size_t n = 1) noexcept {
+            return new(allocate_ptr<T>(n)) T[n];
+        }
+
+        template<typename T>
+        [[nodiscard]] inline types::pointer<T> construct_ptr_unsafe(size_t n = 1) noexcept {
+            return new(allocate_ptr_unsafe<T>(n)) T[n];
+        }
+
+        template<typename T>
+        [[nodiscard]] inline types::reference<T> construct(size_t n = 1) noexcept {
+            return *construct_ptr<T>(n);
+        }
+
+        template<typename T>
+        [[nodiscard]] inline types::reference<T> construct_unsafe(size_t n = 1) noexcept {
+            return *construct_ptr_unsafe<T>(n);
+        }
+
+        template<typename T>
         [[nodiscard]] types::pointer<T> allocate_ptr(size_t n = 1) noexcept {
             pointer_type nsp = sp - memory::nearest_alignment<T, Alignment>(n);
 
@@ -60,24 +80,22 @@ namespace memory {
             if (nsp < region_limit) return nullptr;
 
             sp = nsp;
-            *memory::addressof<T>(*sp) = T{};
             return reinterpret_cast<types::pointer<T>>(sp);
         }
 
         template<typename T>
-        [[nodiscard]] types::reference<T> allocate(size_t n = 1) noexcept {
+        [[nodiscard]] inline types::reference<T> allocate(size_t n = 1) noexcept {
             return *allocate_ptr<T>(n);
         }
 
         template<typename T>
         [[nodiscard]] types::pointer<T> allocate_ptr_unsafe(size_t n = 1) noexcept {
             sp -= memory::nearest_alignment<T, Alignment>(n);
-            *memory::addressof<T>(*sp) = T{};
             return reinterpret_cast<types::pointer<T>>(sp);
         }
 
         template<typename T>
-        [[nodiscard]] types::reference<T> allocate_unsafe(size_t n = 1) noexcept {
+        [[nodiscard]] inline types::reference<T> allocate_unsafe(size_t n = 1) noexcept {
             return *allocate_ptr_unsafe<T>(n);
         }
 
@@ -95,7 +113,7 @@ namespace memory {
         }
 
         template<typename T>
-        void deallocate_unsafe(size_t n = 1) noexcept {
+        void inline deallocate_unsafe(size_t n = 1) noexcept {
             sp += memory::nearest_alignment<T, Alignment>(n);
         }
 

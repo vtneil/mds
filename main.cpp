@@ -15,14 +15,5 @@ region_t region;
 
 int main(int argc, types::pointer<types::pointer<char>> argv) {
 
-    std::bitset<5> b;
-
-    using T = long;
-
-    for (size_t i = 1; i < 20; ++i) {
-        io::println("Nearest aligned container size n ", i, " to T is ",
-                    memory::nearest_alignment<int8_t, sizeof(T)>(i) / sizeof(T));
-    }
-
     return 0;
 }

@@ -1,6 +1,9 @@
 #ifndef LIB_HPA_H
 #define LIB_HPA_H
 
+#include <iostream>
+#include <immintrin.h>
+
 #include "lib/macros_bootstrap.h"
 #include "lib/builtins_bootstrap.h"
 #include "lib/ported_std.h"
