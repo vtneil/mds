@@ -15,7 +15,23 @@ namespace container {
         inline static constexpr size_t SizeActual = memory::nearest_alignment<byte_t, Alignment>(NumBytes);
         inline static constexpr size_t NumElements = SizeActual / Alignment;
 
+        size_t size_;
+        size_t num_bytes_;
+        size_t size_actual_;
+        size_t num_elements_;
         container::array_t<WordT, NumElements> data = {};
+
+        constexpr bitset_t() : size_{Nb} {
+            num_bytes_ = (size_ + 8 - 1) / 8;
+            size_actual_ = memory::nearest_alignment<byte_t, Alignment>(num_bytes_);
+            num_elements_ = size_actual_ / Alignment;
+        }
+
+        explicit constexpr bitset_t(size_t N) : size_{N} {
+            num_bytes_ = (size_ + 8 - 1) / 8;
+            size_actual_ = memory::nearest_alignment<byte_t, Alignment>(num_bytes_);
+            num_elements_ = size_actual_ / Alignment;
+        }
 
         [[nodiscard]] FORCE_INLINE constexpr bool get(size_t index) const {
             size_t idx_word = index / (8 * Alignment);
@@ -70,15 +86,15 @@ namespace container {
         }
 
         [[nodiscard]] constexpr bool all() const noexcept {
-            if CPP17_CONSTEXPR (Nb == SizeActual * 8) {
-                for (size_t i = 0; i < NumElements; ++i) {
+            if (size_ == size_actual_ * 8) {
+                for (size_t i = 0; i < num_elements_; ++i) {
                     if (~data[i] != 0) return false;
                 }
             } else {
-                for (size_t i = 0; i < NumElements - 1; ++i) {
+                for (size_t i = 0; i < num_elements_ - 1; ++i) {
                     if (~data[i] != 0) return false;
                 }
-                for (size_t i = (NumElements - 1) * Alignment * 8; i < Nb; ++i) {
+                for (size_t i = (num_elements_ - 1) * Alignment * 8; i < size_; ++i) {
                     if (!get(i)) return false;
                 }
             }
@@ -99,6 +115,10 @@ namespace container {
         }
 
         [[nodiscard]] FORCE_INLINE constexpr types::size_type size() const noexcept {
+            return size_;
+        }
+
+        [[nodiscard]] FORCE_INLINE constexpr types::size_type capacity() const noexcept {
             return Nb;
         }
     };

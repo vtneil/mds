@@ -1,54 +1,106 @@
-#include <immintrin.h>
-#include <iostream>
+#include <fstream>
+#include <algorithm>
 #include "lib_hpa.h"
 
-//constexpr size_t REGION_SIZE = 16UL * (1024UL * 1024UL * 1024UL);  // GiB
-constexpr size_t REGION_SIZE = 512UL * (1024UL * 1024UL);  // 512 MiB
-constexpr size_t REGION_ALIGNMENT = sizeof(void *);
+constexpr size_t REGION_SIZE = 64UL * (1024UL * 1024UL);  // Region Size in Bytes
+constexpr size_t REGION_ALIGNMENT = 16;  // Alignment in Bytes
 
-using region_t = memory::virtual_stack_region_t<REGION_SIZE, REGION_ALIGNMENT, memory::NewAllocator>;
+using Integral = types::default_aligned_t<int32_t, 16>;
+using Bit = int8_t;
 
-using large_array_t = container::array_t<int, 128UL * 1024UL * 1024U - 2UL>;  // 512 MiB
+static Integral::type num_vertex;
+static Integral::type num_lines;
+constexpr Integral::type MAX_VERTEX = 128;
 
-region_t region;
+using CombBitMask = container::array_t<Bit, MAX_VERTEX>;
+using BitMask = container::bitset_t<MAX_VERTEX, int>;
+using Graph = container::graph_adjacency_list<Integral, MAX_VERTEX, MAX_VERTEX,
+        container::array_t, container::dynamic_array_t, container::array_t,
+        memory::NewAllocator>;
+
+memory::virtual_stack_region_t<REGION_SIZE, REGION_ALIGNMENT, memory::NewAllocator> fast_region;
+
+template<typename T>
+inline constexpr void bitset_or(T &dst, const T &src) {
+    dst |= src;
+}
+
+Integral::type smallest_subset(types::reference<BitMask> output_mask,
+                               types::const_reference<Graph> graph) {
+    // Iterate through all subsets from smallest to largest and return immediately once the subset is dominating.
+
+    // FOR EACH K IN 1..N
+    for (Integral::type k = 1; k <= num_vertex; ++k) {  // (combinatorial: num_vertex choose k)
+        auto &comb_bitmask = fast_region.construct_unsafe<CombBitMask>();
+        comb_bitmask.fill(1, 0, k);
+
+        // FOR EACH COMBINATION (N, K)
+        do {
+            Integral::type subset_size = 0;
+            alignas(64) BitMask domination(num_vertex);
+
+            // FOR EACH SUBSET USING COMBINATION (FIND WHERE = 1)
+            for (Integral::type i = 0; i < num_vertex; ++i) {
+                if (LIKELY(!comb_bitmask[i]))
+                    continue;
+
+                ++subset_size;
+
+                // Graph cover is implicitly created during graph construction
+                bitset_or(domination, graph.cover[i]);
+            }
+
+            if (LIKELY(domination.all())) {
+                // todo: Fix return to correct v mask
+                memcpy(&output_mask, &domination, sizeof(BitMask));
+                return subset_size;
+            }
+
+        } while (std::prev_permutation(comb_bitmask.data, comb_bitmask.data + num_vertex));
+
+        fast_region.deallocate_unsafe<CombBitMask>();
+    }
+
+    return 0;
+}
 
 int main(int argc, types::pointer<types::pointer<char>> argv) {
+    if (argc < 2)
+        return -1;
 
-    constexpr size_t Size = 100;
-    container::bitset_t<Size, int> b;
-    b.set(0, true);
-    b.set(2, true);
-    b.set(3, true);
-    b.set(7, true);
-    b.set(8, true);
-    b.set(9, true);
-    b.set(20, true);
-    io::println(b.data);
-    io::println(b.all());
-    io::println(b.any());
+    io::unsync_stdio();
 
-    container::bitset_t<Size, int> c{b};
-    io::println(c.data);
-    io::println(c.all());
-    io::println(c.any());
+    auto &graph = fast_region.construct_unsafe<Graph>();
+    auto &result = fast_region.construct_unsafe<BitMask>();
 
-    container::bitset_t<Size, int> d;
-    for (size_t i = 0; i < Size; ++i) {
-        d.set(i, true);
+    std::ifstream stream(argv[1]);
+    if (!stream.is_open()) {
+        io::println("Error opening file!");
+        return 1;
     }
-    io::println(d.data);
-    io::println(d.all());
-    io::println(d.any());
 
-    d.set(d.size() - 1, false);
-    io::println(d.data);
-    io::println(d.all());
-    io::println(d.any());
+    benchmark::run_measure<1>([&]() -> void {
+        stream >> num_vertex;
+        stream >> num_lines;
 
-    container::bitset_t<Size, int> e;
-    io::println(e.data);
-    io::println(e.all());
-    io::println(e.any());
+        Integral::type v1, v2;
+
+        while (stream >> v1 >> v2) {
+            graph.push_nodes(container::graph_node<Integral>{v1, {v2}});
+            graph.push_nodes(container::graph_node<Integral>{v2, {v1}});
+        }
+    }, "Initialization");
+
+    stream.close();
+
+    Integral::type n;
+
+    benchmark::run_measure<1>([&]() -> void {
+        n = smallest_subset(result, graph);
+    }, "Algorithm");
+
+//    io::println("Bitmask: ", result.data);
+    io::println("Smallest subset is ", n);
 
     return 0;
 }
