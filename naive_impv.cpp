@@ -14,7 +14,7 @@ constexpr Integral::type MAX_VERTEX = 128;
 
 using CombBitMask = container::array_t<Bit, MAX_VERTEX>;
 using BitMask = container::bitset_t<MAX_VERTEX, int>;
-using Graph = container::graph_adjacency_list<Integral, MAX_VERTEX, MAX_VERTEX,
+using Graph = container::graph_t<Integral, MAX_VERTEX, MAX_VERTEX,
         container::array_t, container::dynamic_array_t, container::array_t,
         memory::NewAllocator>;
 
@@ -49,8 +49,8 @@ Integral::type smallest_subset(types::reference<BitMask> output_mask,
 
                 ++subset_size;
 
-                // Graph cover is implicitly created during graph construction
-                bitset_or(domination, graph.cover[i]);
+                // Graph matrix is implicitly created during graph construction
+                bitset_or(domination, graph.matrix[i]);
             }
 
             if (LIKELY(domination.all())) {

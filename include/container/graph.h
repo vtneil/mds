@@ -31,13 +31,15 @@ namespace container {
             template<typename, types::size_type, template<typename, size_t = 0> class> class SetCoverArrayContainer = container::heap_array_t,
             template<typename, size_t = 0> class Allocator = memory::NewAllocator
     >
-    struct graph_adjacency_list {
+    struct graph_t {
         using edges_container_t = EdgesArrayContainer<Integral, NumEdgePerVertex, Allocator>;
         using graph_container_t = VertexArrayContainer<edges_container_t, NumVertex, Allocator>;
         using set_cover_t = SetCoverArrayContainer<container::bitset_t<NumEdgePerVertex, int>, NumVertex, Allocator>;
+        using deg_array_t = SetCoverArrayContainer<int, NumVertex, Allocator>;
 
         graph_container_t list = {};
-        set_cover_t cover = {};
+        set_cover_t matrix = {};
+        deg_array_t degrees = {};
 
         template<typename ...Integrals>
         constexpr void push_nodes(graph_node<Integrals> ...nodes) {
@@ -52,10 +54,11 @@ namespace container {
         constexpr void push_nodes(types::const_reference<graph_node<Integral>> node) {
             list[node.vertex.value].push_back(node.edges);
 
-            cover[node.vertex.value].set(node.vertex.value, true);
+            matrix[node.vertex.value].set(node.vertex.value, true);
 
             for (const auto &edge: node.edges) {
-                cover[node.vertex.value].set(edge.value, true);
+                matrix[node.vertex.value].set(edge.value, true);
+                ++degrees[node.vertex.value];
             }
         }
 
@@ -86,10 +89,6 @@ namespace container {
         [[nodiscard]] FORCE_INLINE constexpr types::pointer_to_const<edges_container_t> end() const noexcept {
             return list.end();
         }
-    };
-
-    class adjacency_matrix {
-
     };
 }
 

@@ -19,6 +19,7 @@ namespace benchmark {
     auto run_measure(Proc procedure, const char *procedure_name = "") {
         auto dt = measure<Count>(procedure);
         io::println("Time taken for procedure \"", procedure_name, "\": ", dt, " microseconds.");
+        std::cout.flush();
     }
 
     // todo: implement measure for various inputs

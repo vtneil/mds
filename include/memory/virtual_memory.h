@@ -53,6 +53,16 @@ namespace memory {
         }
 
         template<typename T>
+        inline void inplace(types::reference<T> t, size_t n = 1) noexcept {
+            new(&t) T[n]();
+        }
+
+        template<typename T>
+        inline void inplace_ptr(types::pointer<T> t, size_t n = 1) noexcept {
+            new(t) T[n]();
+        }
+
+        template<typename T>
         [[nodiscard]] inline types::pointer<T> construct_ptr(size_t n = 1) noexcept {
             return new(allocate_ptr<T>(n)) T[n]();
         }

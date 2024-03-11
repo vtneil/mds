@@ -54,6 +54,14 @@ namespace container {
             data[idx_word] &= ~(static_cast<WordT>(1) << idx_bit);
         }
 
+        FORCE_INLINE constexpr void clear_all() {
+            memset(data.data, 0x00, SizeActual);
+        }
+
+        FORCE_INLINE constexpr void fill_all() {
+            memset(data.data, 0xFF, SizeActual);
+        }
+
         FORCE_INLINE constexpr void toggle(size_t index) {
             size_t idx_word = index / (8 * Alignment);
             size_t idx_bit = index % (8 * Alignment);
@@ -69,7 +77,7 @@ namespace container {
         }
 
         bitset_t &operator|=(const bitset_t &other) {
-            for (size_t i = 0; i < NumElements; ++i) {
+            for (long i = 0; i < NumElements; ++i) {
                 data[i] |= other.data[i];
             }
             return *this;
@@ -97,6 +105,14 @@ namespace container {
                 for (size_t i = (num_elements_ - 1) * Alignment * 8; i < size_; ++i) {
                     if (!get(i)) return false;
                 }
+            }
+
+            return true;
+        }
+
+        [[nodiscard]] constexpr bool padded_fast_all() const noexcept {
+            for (size_t i = 0; i < NumElements; ++i) {
+                if (~data[i] != 0) return false;
             }
 
             return true;
