@@ -54,11 +54,11 @@ namespace container {
             data[idx_word] &= ~(static_cast<WordT>(1) << idx_bit);
         }
 
-        FORCE_INLINE constexpr void clear_all() {
+        FORCE_INLINE constexpr void reset() {
             memset(data.data, 0x00, SizeActual);
         }
 
-        FORCE_INLINE constexpr void fill_all() {
+        FORCE_INLINE constexpr void set() {
             memset(data.data, 0xFF, SizeActual);
         }
 
@@ -83,14 +83,38 @@ namespace container {
             return *this;
         }
 
-        bitset_t operator&(const bitset_t &other) {
+        bitset_t operator&(const bitset_t &other) const {
             bitset_t dst{*this};
             return (dst &= other);
         }
 
-        bitset_t operator|(const bitset_t &other) {
+        bitset_t operator|(const bitset_t &other) const {
             bitset_t dst{*this};
             return (dst |= other);
+        }
+
+        [[nodiscard]] constexpr size_t count_container() const noexcept {
+            size_t res = 0;
+
+            if CPP17_CONSTEXPR (sizeof(WordT) == sizeof(int) ||
+                                sizeof(WordT) == sizeof(short) ||
+                                sizeof(WordT) == sizeof(char)) {
+                for (size_t i = 0; i < NumElements; ++i) {
+                    res += __builtin_popcount(data[i]);
+                }
+            } else if CPP17_CONSTEXPR (sizeof(WordT) == sizeof(long)) {
+                for (size_t i = 0; i < NumElements; ++i) {
+                    res += __builtin_popcountl(data[i]);
+                }
+            } else if CPP17_CONSTEXPR (sizeof(WordT) == sizeof(long long)) {
+                for (size_t i = 0; i < NumElements; ++i) {
+                    res += __builtin_popcountll(data[i]);
+                }
+            } else {
+                UNREACHABLE();
+            }
+
+            return res;
         }
 
         [[nodiscard]] constexpr bool all() const noexcept {
@@ -108,6 +132,10 @@ namespace container {
             }
 
             return true;
+        }
+
+        [[nodiscard]] constexpr bool popcount_all() const noexcept {
+            return count_container() == size_;
         }
 
         [[nodiscard]] constexpr bool padded_fast_all() const noexcept {
@@ -136,6 +164,19 @@ namespace container {
 
         [[nodiscard]] FORCE_INLINE constexpr types::size_type capacity() const noexcept {
             return Nb;
+        }
+
+        void info() {
+            io::print("CONTAINER: ");
+            for (size_t i = 0; i < Nb; ++i) {
+                io::print(get(i));
+            }
+            io::println();
+            io::print("DATA:      ");
+            for (size_t i = 0; i < size_; ++i) {
+                io::print(get(i));
+            }
+            io::println();
         }
     };
 }

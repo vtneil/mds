@@ -4,20 +4,21 @@
 #include <chrono>
 
 namespace benchmark {
-    template<size_t Count = 1, typename Proc>
+    template<size_t Trials = 1, typename Proc>
     auto measure(Proc procedure, const char *procedure_name = "") {
         auto start = std::chrono::high_resolution_clock::now();
-        for (size_t i = 0; i < Count; ++i)
+        for (size_t i = 0; i < Trials; ++i)
             (void) procedure();
         auto stop = std::chrono::high_resolution_clock::now();
 
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-        return duration.count();
+        auto t = duration.count();
+        return t / static_cast<decltype(t)>(Trials);
     }
 
-    template<size_t Count = 1, typename Proc>
+    template<size_t Trials = 1, typename Proc>
     auto run_measure(Proc procedure, const char *procedure_name = "") {
-        auto dt = measure<Count>(procedure);
+        auto dt = measure<Trials>(procedure);
         io::println("Time taken for procedure \"", procedure_name, "\": ", dt, " microseconds.");
         std::cout.flush();
     }

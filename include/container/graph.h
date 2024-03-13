@@ -34,7 +34,7 @@ namespace container {
     struct graph_t {
         using edges_container_t = EdgesArrayContainer<Integral, NumEdgePerVertex, Allocator>;
         using graph_container_t = VertexArrayContainer<edges_container_t, NumVertex, Allocator>;
-        using set_cover_t = SetCoverArrayContainer<container::bitset_t<NumEdgePerVertex, int>, NumVertex, Allocator>;
+        using set_cover_t = SetCoverArrayContainer<container::bitset_t<NumEdgePerVertex, int_fast32_t>, NumVertex, Allocator>;
         using deg_array_t = SetCoverArrayContainer<int, NumVertex, Allocator>;
 
         graph_container_t list = {};

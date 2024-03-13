@@ -9,7 +9,7 @@ using Integral = types::default_aligned_t<int_fast32_t, 0>;
 using Bit = int_fast8_t;
 
 static Integral::type num_vertex;
-static Integral::type num_edge;
+static Integral::type num_lines;
 constexpr Integral::type MAX_VERTEX = 128;
 
 using CombBitMask = container::array_t<Bit, MAX_VERTEX>;
@@ -25,9 +25,6 @@ Integral::type smallest_subset_bsearch(types::reference<CombBitMask> output_mask
                                        types::const_reference<Graph> graph) {
     // Pre-allocation
     alignas(64) BitMask domination(num_vertex);
-    alignas(64) BitMask mask_truth[2] = {BitMask(num_vertex),
-                                         BitMask(num_vertex)};
-    mask_truth[1].set();
 
     CombBitMask comb_bitmask;
 
@@ -53,7 +50,8 @@ Integral::type smallest_subset_bsearch(types::reference<CombBitMask> output_mask
 
             // FOR EACH SUBSET USING COMBINATION (FIND WHERE = 1)
             for (Integral::type i = 0; i < num_vertex; ++i) {
-                domination |= graph.matrix[i] & mask_truth[comb_bitmask[i]];
+                if (UNLIKELY(comb_bitmask[i]))
+                    domination |= graph.matrix[i];
             }
 
             // Found: mark this and try searching smaller sets
@@ -62,7 +60,6 @@ Integral::type smallest_subset_bsearch(types::reference<CombBitMask> output_mask
                 high = k - 1;
 
                 ans = k;
-
                 output_mask = comb_bitmask;
                 break;
             }
@@ -78,15 +75,15 @@ Integral::type smallest_subset_bsearch(types::reference<CombBitMask> output_mask
     return ans;
 }
 
-
-Integral::type smallest_subset_linear_ascending(types::reference<CombBitMask> output_mask,
-                                                types::const_reference<Graph> graph) {
-    alignas(64) BitMask domination(num_vertex);
-    alignas(64) BitMask mask_truth[2] = {BitMask(num_vertex),
-                                         BitMask(num_vertex)};
-    mask_truth[1].set();
+Integral::type smallest_subset_linear(types::reference<CombBitMask> output_mask,
+                                      types::const_reference<Graph> graph) {
+    alignas(64) BitMask pad_clear(num_vertex);
+    pad_clear.set();
+    for (Integral::type i = 0; i < num_vertex; ++i)
+        pad_clear.set(i, false);
 
     CombBitMask comb_bitmask;
+    alignas(64) BitMask domination(num_vertex);
 
     // Iterate through all subsets from smallest to largest and return immediately once the subset is dominating.
     for (Integral::type k = 1; k <= num_vertex; ++k) {  // (combinatorial: num_vertex choose k)
@@ -96,13 +93,15 @@ Integral::type smallest_subset_linear_ascending(types::reference<CombBitMask> ou
         // FOR EACH COMBINATION (N, K)
         do {
             domination.reset();
+            domination |= pad_clear;
 
             // FOR EACH SUBSET USING COMBINATION (FIND WHERE = 1)
             for (Integral::type i = 0; i < num_vertex; ++i) {
-                domination |= graph.matrix[i] & mask_truth[comb_bitmask[i]];
+                if (UNLIKELY(comb_bitmask[i]))
+                    domination |= graph.matrix[i];
             }
 
-            if (domination.popcount_all()) {
+            if (LIKELY(domination.all())) {
                 output_mask = comb_bitmask;
                 return k;
             }
@@ -134,7 +133,7 @@ int main(int argc, types::pointer<types::pointer<char>> argv) {
 
     benchmark::run_measure<1>([&]() -> void {
         stream >> num_vertex;
-        stream >> num_edge;
+        stream >> num_lines;
 
         Integral::type v1, v2;
 
@@ -146,14 +145,13 @@ int main(int argc, types::pointer<types::pointer<char>> argv) {
 
     stream.close();
 
-    // Algorithms
+    // Algorithm
 
     Integral::type n;
 
-    //
-    benchmark::run_measure<1>([&]() -> void {
-        n = smallest_subset_linear_ascending(result, graph);
-    }, "Linear Search");
+    benchmark::run_measure<3>([&]() -> void {
+        n = smallest_subset_bsearch(result, graph);
+    }, "Binary Search");
 
     io::println("Smallest subset is ", n);
     for (Integral::type i = 0; i < num_vertex; ++i) {
@@ -161,10 +159,9 @@ int main(int argc, types::pointer<types::pointer<char>> argv) {
     }
     io::println();
 
-    //
-    benchmark::run_measure<1>([&]() -> void {
-        n = smallest_subset_bsearch(result, graph);
-    }, "Binary Search");
+    benchmark::run_measure<3>([&]() -> void {
+        n = smallest_subset_linear(result, graph);
+    }, "Linear Search");
 
     io::println("Smallest subset is ", n);
     for (Integral::type i = 0; i < num_vertex; ++i) {
