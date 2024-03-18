@@ -125,7 +125,7 @@ namespace container {
             return true;
         }
 
-        void unionize() {
+        void unionize(graph_t &dst) {
             bool stop_flag = false;
 
             // Unionize by setting this graph (will be unusable)
@@ -161,22 +161,26 @@ namespace container {
                 }
             }
 
-            size_t v_new = v, e_new = 0;
+            SetCoverArrayContainer<typename Integral::type, NumVertex, Allocator> reverse_v_map = {};
 
-            for (typename Integral::type i = 0; i < v; ++i) {
+            dst.v = 0;
+
+            for (typename Integral::type i = 0, pos = 0; i < v; ++i) {
                 if (set[i] == vertex_set::RED) {
+                    reverse_v_map[i] = pos++;
                     unique.push_back(i);
+                    ++dst.v;
                 }
             }
 
-            io::println("Unique vertices: ", unique.size());
-            io::println(unique);
-
-            // todo: Edges count
-
-            // todo: Create a new graph with reduced vertices (0 -> unique.size())
-            // Remark: unique dynamic array can be used later to map back to
-            // original vertices. (Some overhead, but faster search)
+            for (typename Integral::type i = 0; i < unique.size(); ++i) {
+                for (typename Integral::type j = 0; j < v; ++j) {
+                    if (i != reverse_v_map[j] && set[j] == vertex_set::RED && matrix[unique[i]].get(j)) {
+                        dst.push_nodes(container::graph_node<Integral>{i, {reverse_v_map[j]}});
+                        dst.push_nodes(container::graph_node<Integral>{reverse_v_map[j], {i}});
+                    }
+                }
+            }
         }
     };
 }

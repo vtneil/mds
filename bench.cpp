@@ -2,18 +2,17 @@
 #include "lib_hpa.h"
 
 int main() {
-    using bs = container::bitset_t<32>;
 
-    bs b1(25);
+    container::array_t<int, 32> comb_bitmask = {};
+    int k = 3;
+    int v = 6;
 
-    b1.set();
-    b1.set(3, false);
-    b1.set(5, false);
+    comb_bitmask.fill(1, 0, k);
+    comb_bitmask.fill(0, k, v);
 
-    b1.info();
-
-    bs b2(b1);
-    b2.info();
+    do {
+        io::println(comb_bitmask);
+    } while (std::prev_permutation(comb_bitmask.data, comb_bitmask.data + v));
 
     return 0;
 }

@@ -204,7 +204,7 @@ namespace container {
             return Nb;
         }
 
-        void info() {
+        void info() const {
             io::print("CONTAINER: ");
             for (size_t i = 0; i < Nb; ++i) {
                 io::print(get(i));
