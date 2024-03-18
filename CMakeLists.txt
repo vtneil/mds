@@ -30,6 +30,7 @@ function(new_target target_name target_file)
 endfunction()
 
 # Targets
+new_target(reference reference_exact.cpp)
 new_target(program main.cpp)
 new_target(benchmark bench.cpp)
 new_target(naive naive.cpp)

@@ -5,6 +5,11 @@
 #include "container/array.h"
 
 namespace container {
+    enum class bitset_compare : int8_t {
+        NO_COVER = 0,
+        COVERS,
+        COVERED_BY,
+    };
 
     template<size_t Nb, typename WordT = int>
     struct bitset_t {
@@ -32,6 +37,10 @@ namespace container {
             size_actual_ = memory::nearest_alignment<byte_t, Alignment>(num_bytes_);
             num_elements_ = size_actual_ / Alignment;
         }
+
+        constexpr bitset_t(const bitset_t &other) = default;
+
+        constexpr bitset_t(bitset_t &&other) noexcept = default;
 
         [[nodiscard]] FORCE_INLINE constexpr bool get(size_t index) const {
             size_t idx_word = index / (8 * Alignment);
@@ -77,7 +86,7 @@ namespace container {
         }
 
         bitset_t &operator|=(const bitset_t &other) {
-            for (long i = 0; i < NumElements; ++i) {
+            for (size_t i = 0; i < NumElements; ++i) {
                 data[i] |= other.data[i];
             }
             return *this;
@@ -91,6 +100,24 @@ namespace container {
         bitset_t operator|(const bitset_t &other) const {
             bitset_t dst{*this};
             return (dst |= other);
+        }
+
+        /**
+         * Compare container, not data.\n
+         * Unsafe, but fast.
+         *
+         * @param other
+         * @return
+         */
+        bool operator==(const bitset_t &other) const {
+            for (size_t i = 0; i < NumElements; ++i) {
+                if (data[i] != other.data[i]) return false;
+            }
+            return true;
+        }
+
+        bool operator!=(const bitset_t &other) const {
+            return !(this->operator==(other));
         }
 
         [[nodiscard]] constexpr size_t count_container() const noexcept {
@@ -157,6 +184,17 @@ namespace container {
         [[nodiscard]] constexpr bool none() const noexcept {
             return !any();
         }
+
+        [[nodiscard]] bitset_compare compare(const bitset_t &other) const noexcept {
+            bitset_t unionized(this->operator|(other));
+            if (unionized == *this)
+                return bitset_compare::COVERS;
+            if (unionized == other)
+                return bitset_compare::COVERED_BY;
+            return bitset_compare::NO_COVER;
+        }
+
+        // Capacity
 
         [[nodiscard]] FORCE_INLINE constexpr types::size_type size() const noexcept {
             return size_;

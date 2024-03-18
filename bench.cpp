@@ -2,11 +2,18 @@
 #include "lib_hpa.h"
 
 int main() {
-    int x = 3;
-    int y = 3;
+    using bs = container::bitset_t<32>;
 
-    io::println(__builtin_popcount(x));
-    io::println(__builtin_popcount(y));
+    bs b1(25);
+
+    b1.set();
+    b1.set(3, false);
+    b1.set(5, false);
+
+    b1.info();
+
+    bs b2(b1);
+    b2.info();
 
     return 0;
 }
