@@ -68,7 +68,7 @@ int main() {
 
     int n;
 
-    benchmark::run_measure<1>([&]() -> void {
+    benchmark::run<1>([&]() -> void {
         n = findSmallestDominatingSet(graph);
     });
 

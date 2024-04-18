@@ -77,12 +77,12 @@ namespace types {
 
     template<typename Tp>
     struct use_pass_value {
-        inline constexpr static bool value = sizeof(Tp) <= sizeof(void *) || std::is_fundamental<Tp>::value;
+        constexpr static bool value = sizeof(Tp) <= sizeof(void *) || std::is_fundamental<Tp>::value;
     };
 
     template<typename Tp>
     struct use_const_reference {
-        inline constexpr static bool value = !use_pass_value<Tp>::value;
+        constexpr static bool value = !use_pass_value<Tp>::value;
     };
 
     template<typename Tp>
@@ -95,6 +95,7 @@ namespace types {
     struct remove_const {
         using type = Tp;
     };
+
     template<typename Tp>
     struct remove_const<const Tp> {
         using type = Tp;
@@ -107,6 +108,7 @@ namespace types {
     struct remove_volatile {
         using type = Tp;
     };
+
     template<typename Tp>
     struct remove_volatile<volatile Tp> {
         using type = Tp;
@@ -140,12 +142,12 @@ namespace types {
 
     template<typename Tp1, typename Tp2>
     struct is_same : public ported::false_type {
-        inline static constexpr bool value = false;
+        static constexpr bool value = false;
     };
 
     template<typename Tp>
     struct is_same<Tp, Tp> : public ported::true_type {
-        inline static constexpr bool value = true;
+        static constexpr bool value = true;
     };
 
     template<bool Cond, typename Tp = void>

@@ -5,7 +5,8 @@
 #include "utils/io.h"
 
 namespace container {
-    template<template<typename, types::size_type, template<typename, size_t = 0> class> class ArrayForm, typename Tp, types::size_type Size>
+    template<template<typename, types::size_type, template<typename, size_t = 0> class> class ArrayForm, typename Tp,
+        types::size_type Size>
     class array_container_t {
     private:
         using ConcreteArray = ArrayForm<Tp, Size, memory::UnusedAllocator>;
@@ -155,10 +156,11 @@ namespace container {
     /**
      * Static heap-allocated data container
      */
-    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class BaseAllocator = memory::DefaultAllocator>
+    template<typename Tp, types::size_type Size, template<typename, size_t = 0> class BaseAllocator =
+        memory::DefaultAllocator>
     struct heap_array_t : public array_container_t<heap_array_t, Tp, Size> {
         using array_type = array_t<Tp, Size>;
-        using array_allocator = BaseAllocator<array_t<Tp, Size>>;
+        using array_allocator = BaseAllocator<array_t<Tp, Size> >;
 
         types::reference<array_type> &data = *array_allocator::allocate();
 
@@ -172,13 +174,13 @@ namespace container {
      * based on data's size in bytes (default: 1 MiB)
      */
     template<typename Tp,
-            types::size_type Size,
-            template<typename, size_t = 0> class BaseAllocator = memory::DefaultAllocator,
-            size_t StackSizeThreshold = 1024UL * 1024UL  // 1 MiB limit
+        types::size_type Size,
+        template<typename, size_t = 0> class BaseAllocator = memory::DefaultAllocator,
+        size_t StackSizeThreshold = 1024UL * 1024UL // 1 MiB limit
     >
     using auto_array_t = logical::conditional<(Size * sizeof(Tp) > StackSizeThreshold),
-            heap_array_t<Tp, Size, BaseAllocator>,
-            array_t<Tp, Size, BaseAllocator>
+        heap_array_t<Tp, Size, BaseAllocator>,
+        array_t<Tp, Size, BaseAllocator>
     >;
 
     template<typename Tp, types::size_type Capacity, typename ArrayContainer>
@@ -186,8 +188,13 @@ namespace container {
         ArrayContainer data = {};
         types::size_type idx = {};
 
-        template<typename ...Ts>
-        FORCE_INLINE constexpr void push_back(types::const_reference<Ts> ...ts) {
+        dynamic_array_container_t() = default;
+
+        explicit dynamic_array_container_t(const size_t n) : idx{n} {
+        }
+
+        template<typename... Ts>
+        FORCE_INLINE constexpr void push_back(types::const_reference<Ts>... ts) {
             push_back({ts...});
         }
 
@@ -201,8 +208,8 @@ namespace container {
                 push_back_unsafe(t);
         }
 
-        template<typename ...Ts>
-        FORCE_INLINE constexpr void push_back_unsafe(types::const_reference<Ts> ...ts) {
+        template<typename... Ts>
+        FORCE_INLINE constexpr void push_back_unsafe(types::const_reference<Ts>... ts) {
             push_back_unsafe({ts...});
         }
 
@@ -215,14 +222,14 @@ namespace container {
             data[idx++] = t;
         }
 
-        template<typename ...Ts>
-        FORCE_INLINE constexpr void emplace_back(types::const_reference<Ts> ...ts) {
+        template<typename... Ts>
+        FORCE_INLINE constexpr void emplace_back(types::const_reference<Ts>... ts) {
             if (idx < Capacity)
                 emplace_back_unsafe(ts...);
         }
 
-        template<typename ...Ts>
-        FORCE_INLINE constexpr void emplace_back_unsafe(types::const_reference<Ts> ...ts) {
+        template<typename... Ts>
+        FORCE_INLINE constexpr void emplace_back_unsafe(types::const_reference<Ts>... ts) {
             push_back_unsafe(Tp{ts...});
         }
 
@@ -292,29 +299,30 @@ namespace container {
     };
 
     template<typename Tp,
-            types::size_type Capacity,
-            template<typename, size_t> class ContainerAllocator = memory::UnusedAllocator
+        types::size_type Capacity,
+        template<typename, size_t> class ContainerAllocator = memory::UnusedAllocator
     >
-    using dynamic_array_t = dynamic_array_container_t<Tp, Capacity, array_t<Tp, Capacity, ContainerAllocator>>;
+    using dynamic_array_t = dynamic_array_container_t<Tp, Capacity, array_t<Tp, Capacity, ContainerAllocator> >;
 
     template<typename Tp,
-            types::size_type Capacity,
-            template<typename, size_t> class ContainerAllocator = memory::DefaultAllocator
+        types::size_type Capacity,
+        template<typename, size_t> class ContainerAllocator = memory::DefaultAllocator
     >
-    using heap_dynamic_array_t = dynamic_array_container_t<Tp, Capacity, heap_array_t<Tp, Capacity, ContainerAllocator>>;
+    using heap_dynamic_array_t = dynamic_array_container_t<Tp, Capacity, heap_array_t<Tp, Capacity,
+        ContainerAllocator> >;
 
     /**
      * Automatic region/heap allocation selection for dynamic array container with static data
      * based on data's size in bytes (default: 1 MiB)
      */
     template<typename Tp,
-            types::size_type Size,
-            template<typename, size_t = 0> class BaseAllocator = memory::DefaultAllocator,
-            size_t StackSizeThreshold = 1024UL * 1024UL  // 1 MiB limit
+        types::size_type Size,
+        template<typename, size_t = 0> class BaseAllocator = memory::DefaultAllocator,
+        size_t StackSizeThreshold = 1024UL * 1024UL // 1 MiB limit
     >
     using auto_dynamic_array_t = logical::conditional<(Size * sizeof(Tp) > StackSizeThreshold),
-            heap_dynamic_array_t<Tp, Size, BaseAllocator>,
-            dynamic_array_t<Tp, Size, BaseAllocator>
+        heap_dynamic_array_t<Tp, Size, BaseAllocator>,
+        dynamic_array_t<Tp, Size, BaseAllocator>
     >;
 }
 

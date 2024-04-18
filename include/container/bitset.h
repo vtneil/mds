@@ -15,16 +15,16 @@ namespace container {
     struct bitset_t {
         using byte_t = int8_t;
 
-        inline static constexpr size_t Alignment = sizeof(WordT);
-        inline static constexpr size_t NumBytes = (Nb + 8 - 1) / 8;
-        inline static constexpr size_t SizeActual = memory::nearest_alignment<byte_t, Alignment>(NumBytes);
-        inline static constexpr size_t NumElements = SizeActual / Alignment;
+        static constexpr size_t Alignment = sizeof(WordT);
+        static constexpr size_t NumBytes = (Nb + 8 - 1) / 8;
+        static constexpr size_t SizeActual = memory::nearest_alignment<byte_t, Alignment>(NumBytes);
+        static constexpr size_t NumElements = SizeActual / Alignment;
 
         size_t size_;
         size_t num_bytes_;
         size_t size_actual_;
         size_t num_elements_;
-        container::array_t<WordT, NumElements> data = {};
+        array_t<WordT, NumElements> data = {};
 
         constexpr bitset_t() : size_{Nb} {
             num_bytes_ = (size_ + 8 - 1) / 8;

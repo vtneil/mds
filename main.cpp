@@ -1,219 +1,153 @@
+#include <vector>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <fstream>
-#include <algorithm>
+#include "ortools/linear_solver/linear_solver.h"
 #include "lib_hpa.h"
 
-constexpr size_t REGION_SIZE = 128UL * (1024UL * 1024UL);  // Region Size in Bytes
-constexpr size_t REGION_ALIGNMENT = 64;  // Alignment in Bytes
+template<typename Tp>
+using vector_t = std::vector<Tp>;
+// using vector_t = std::pmr::vector<Tp>;
 
-using Integral = types::default_aligned_t<int_fast32_t, 0>;
-using Bit = int_fast8_t;
+using vertex_t = int;
+using edges_t = vector_t<vertex_t>;
+using graph_t = vector_t<edges_t>;
 
-constexpr Integral::type MAX_VERTEX = 128;
+graph_t graph;
+edges_t solution;
 
-using CombBitMask = container::array_t<Bit, MAX_VERTEX>;
-using BitMask = container::bitset_t<MAX_VERTEX, int_fast32_t>;
-using Graph = container::graph_t<Integral, MAX_VERTEX, MAX_VERTEX,
-        container::array_t, container::dynamic_array_t, container::array_t,
-        memory::NewAllocator>;
+void read_graph_from_file(types::const_pointer_to_const<char> filename) {
+    std::ifstream stream(filename);
 
-memory::virtual_stack_region_t<REGION_SIZE, REGION_ALIGNMENT, memory::NewAllocator> fast_region;
-
-
-Integral::type smallest_subset_bsearch(types::reference<CombBitMask> output_mask,
-                                       types::const_reference<Graph> graph) {
-    // Pre-allocation
-    ALIGNED(64) BitMask domination(graph.v);
-    ALIGNED(64) BitMask mask_truth[2] = {BitMask(graph.v),
-                                         BitMask(graph.v)};
-    mask_truth[1].set();
-
-    CombBitMask comb_bitmask;
-
-    Integral::type ans = -1;
-    Integral::type low = 1;
-    Integral::type high = graph.v;
-    Integral::type k;
-
-    // Binary search k (combinatorial: graph.v choose k)
-    while (true) {
-        if (LIKELY(low > high))
-            break;
-
-        Integral::type found = 0;
-        k = low + (high - low) / 2;
-
-        comb_bitmask.fill(1, 0, k);
-        comb_bitmask.fill(0, k, graph.v);
-
-        // FOR EACH COMBINATION IN (N, K)
-        do {
-            domination.reset();
-
-            // FOR EACH SUBSET USING COMBINATION (FIND WHERE = 1)
-            for (Integral::type i = 0; i < graph.v; ++i) {
-                domination |= graph.matrix[i] & mask_truth[comb_bitmask[i]];
-            }
-
-            // Found: mark this and try searching smaller sets
-            // how to go branchless?
-            if (domination.popcount_all()) {
-                found = 1;
-                high = k - 1;
-                ans = k;
-
-                output_mask = comb_bitmask;
-                break;
-            }
-
-        } while (std::prev_permutation(comb_bitmask.data, comb_bitmask.data + graph.v));
-
-        // Not found: try searching larger sets
-        low = (found) ? low : k + 1;
+    if (!stream.is_open()) {
+        return;
     }
 
-    return ans;
-}
+    size_t v, e;
 
+    stream >> v;
+    stream >> e;
 
-Integral::type smallest_subset_linear_ascending(types::reference<CombBitMask> output_mask,
-                                                types::const_reference<Graph> graph) {
-    ALIGNED(64) BitMask domination(graph.v);
-    ALIGNED(64) BitMask mask_truth[2] = {BitMask(graph.v),
-                                         BitMask(graph.v)};
-    mask_truth[1].set();
+    graph.resize(v);
+    for (types::reference<edges_t> edge: graph)
+        edge.reserve(v);
 
-    CombBitMask comb_bitmask;
+    vertex_t v1, v2;
 
-    // Iterate through all subsets from smallest to largest and return immediately once the subset is dominating.
-    for (Integral::type k = 1; k <= graph.v; ++k) {  // (combinatorial: graph.v choose k)
-        comb_bitmask.fill(1, 0, k);
-        comb_bitmask.fill(0, k, graph.v);
-
-        // FOR EACH COMBINATION (N, K)
-        do {
-            domination.reset();
-
-            // FOR EACH SUBSET USING COMBINATION (FIND WHERE = 1)
-            for (Integral::type i = 0; i < graph.v; ++i) {
-                domination |= graph.matrix[i] & mask_truth[comb_bitmask[i]];
-            }
-
-            if (domination.popcount_all()) {
-                output_mask = comb_bitmask;
-                return k;
-            }
-
-        } while (std::prev_permutation(comb_bitmask.data, comb_bitmask.data + graph.v));
+    while (stream >> v1 >> v2) {
+        graph[v1].push_back(v2);
+        graph[v2].push_back(v1);
     }
 
-    return 0;
+    stream.close();
 }
 
-Integral::type smallest_subset_linear_descending(types::reference<CombBitMask> output_mask,
-                                                 types::const_reference<Graph> graph) {
-    ALIGNED(64) BitMask domination(graph.v);
-    ALIGNED(64) BitMask mask_truth[2] = {BitMask(graph.v),
-                                         BitMask(graph.v)};
-    mask_truth[1].set();
+std::mutex solver_mutex;
+std::condition_variable cv;
+bool solution_found = false;
 
-    Integral::type is_dom;
-    CombBitMask comb_bitmask;
+namespace operations_research {
+    void solve_mds(
+        const char *solver_name,
+        const MPSolver::OptimizationProblemType backend = MPSolver::CBC_MIXED_INTEGER_PROGRAMMING
+    ) noexcept {
+        MPSolver solver(solver_name, backend);
 
-    // Iterate through all subsets from smallest to largest and return immediately once the subset is dominating.
-    for (Integral::type k = graph.v; k > 0; --k) {  // (combinatorial: graph.v choose k)
-        comb_bitmask.fill(1, 0, k);
-        comb_bitmask.fill(0, k, graph.v);
+        // Guarantee exit after 10 seconds.
+        solver.set_time_limit(10000);
 
-        // FOR EACH COMBINATION (N, K)
-        do {
-            domination.reset();
+        const auto n = static_cast<vertex_t>(graph.size());
+        vector_t<const MPVariable *> x(n);
+        solution.resize(n, 0);
 
-            // FOR EACH SUBSET USING COMBINATION (FIND WHERE = 1)
-            for (Integral::type i = 0; i < graph.v; ++i) {
-                domination |= graph.matrix[i] & mask_truth[comb_bitmask[i]];
+        // Variables
+        for (vertex_t i = 0; i < n; ++i) {
+            x[i] = solver.MakeBoolVar(std::to_string(i));
+        }
+
+        // Constraints
+        for (vertex_t i = 0; i < n; ++i) {
+            types::reference<MPConstraint> constraint = *solver.MakeRowConstraint(1, MPSolver::infinity());
+            constraint.SetCoefficient(x[i], 1);
+
+            for (const vertex_t j: graph[i])
+                constraint.SetCoefficient(x[j], 1);
+        }
+
+        // Objective
+        types::reference<MPObjective> objective = *solver.MutableObjective();
+        for (vertex_t i = 0; i < n; ++i) {
+            objective.SetCoefficient(x[i], 1);
+        }
+        objective.SetOptimizationDirection(false);
+
+        // Solve
+        std::unique_lock<std::mutex> lock(solver_mutex);
+        if (!solution_found) {
+            lock.unlock();
+            const MPSolver::ResultStatus status = solver.Solve();
+            lock.lock();
+
+            if (status == MPSolver::OPTIMAL && !solution_found) {
+                solution_found = true;
+                cv.notify_all();
+                for (vertex_t i = 0; i < n; ++i)
+                    solution[i] = static_cast<int>(x[i]->solution_value());
             }
-
-            is_dom = domination.popcount_all();
-
-            if (is_dom) {
-                output_mask = comb_bitmask;
-                break;
-            }
-
-        } while (std::prev_permutation(comb_bitmask.data, comb_bitmask.data + graph.v));
-
-        if (!is_dom) {
-            return k + 1;
         }
     }
-
-    return 0;
 }
 
-int main(int argc, types::pointer<types::pointer<char>> argv) {
-    if (argc < 2)
+int main(const int argc, char **argv) {
+    if (argc < 3)
         return -1;
 
-    // Problem Instance
-    auto &graph = fast_region.construct_unsafe<Graph>();
-    auto &result = fast_region.construct_unsafe<CombBitMask>();
+    // Graph Initialization
+    read_graph_from_file(argv[1]);
 
-    fast_region.info();
+    // Solver workers
+    std::thread solvers[] = {
+        std::thread(
+            operations_research::solve_mds,
+            "BOP Solver",
+            operations_research::MPSolver::BOP_INTEGER_PROGRAMMING
+        ),
+        std::thread(
+            operations_research::solve_mds,
+            "CBC Solver",
+            operations_research::MPSolver::CBC_MIXED_INTEGER_PROGRAMMING
+        ),
+        std::thread(
+            operations_research::solve_mds,
+            "SAT Solver",
+            operations_research::MPSolver::SAT_INTEGER_PROGRAMMING
+        ),
+        std::thread(
+            operations_research::solve_mds,
+            "SCIP Solver",
+            operations_research::MPSolver::SCIP_MIXED_INTEGER_PROGRAMMING
+        )
+    };
 
-    // IO
-    io::unsync_stdio();
+    // Wait for finish and detach threads
+    std::mutex mtx;
+    std::unique_lock<std::mutex> lock(mtx);
+    cv.wait(lock, [] { return solution_found; });
 
-    bool success;
-    benchmark::run_measure<1>([&]() -> void {
-        success = graph.from_file(argv[1]);
-    }, "I/O & Graph Initialization");
+    // Detach all threads (guaranteed to stop)
+    for (auto &thread: solvers)
+        thread.detach();
 
-    if (!success) {
-        io::println("Error opening file!");
-        return 255;
+    // Show the result
+    std::ofstream file(argv[2]);
+    if (!file.is_open()) {
+        return 1;
     }
-
-    // Graph classes
-    float density = graph_utils::density(graph.v, graph.e);
-    io::println(density);
-
-//    return 0;
-
-    // Algorithms
-    Integral::type n;
-
-    //
-    benchmark::run_measure<1>([&]() -> void {
-        n = smallest_subset_bsearch(result, graph);
-    }, "Binary Search");
-
-    io::println("Smallest subset is ", n);
-    for (Integral::type i = 0; i < graph.v; ++i) {
-        io::print(static_cast<int>(result[i]));
+    for (const vertex_t i: solution) {
+        file << i;
     }
-    io::println();
-
-    //
-    benchmark::run_measure<1>([&]() -> void {
-        n = smallest_subset_linear_ascending(result, graph);
-    }, "Linear Ascending Search");
-
-    io::println("Smallest subset is ", n);
-    for (Integral::type i = 0; i < graph.v; ++i) {
-        io::print(static_cast<int>(result[i]));
-    }
-    io::println();
-
-    //
-    benchmark::run_measure<1>([&]() -> void {
-        n = smallest_subset_linear_descending(result, graph);
-    }, "Linear Descending Search");
-
-    io::println("Smallest subset is ", n);
-    for (Integral::type i = 0; i < graph.v; ++i) {
-        io::print(static_cast<int>(result[i]));
-    }
-    io::println();
+    file.close();
 
     return 0;
 }

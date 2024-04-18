@@ -22,5 +22,6 @@
 #include "container/deque.h"
 #include "container/graph.h"
 #include "container/bitset.h"
+#include "container/aligned_matrix.h"
 
 #endif //LIB_HPA_H

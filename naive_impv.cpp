@@ -138,7 +138,7 @@ int main(int argc, types::pointer<types::pointer<char>> argv) {
 //    }, "Initialization");
 
     // Simple path graph
-    benchmark::run_measure<1>([&]() -> void {
+    benchmark::run<1>([&]() -> void {
         for (Integral::type i = 0; i < num_vertex - 1; ++i) {
             graph.push_nodes(container::graph_node<Integral>{i, {i + 1}});
             graph.push_nodes(container::graph_node<Integral>{i + 1, {i}});
@@ -157,7 +157,7 @@ int main(int argc, types::pointer<types::pointer<char>> argv) {
 
     Integral::type n;
 
-    benchmark::run_measure<1>([&]() -> void {
+    benchmark::run<1>([&]() -> void {
         n = smallest_subset(result, graph);
     }, "Algorithm");
 

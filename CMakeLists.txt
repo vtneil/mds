@@ -8,7 +8,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
 else ()
     set(opt_compile_opt "-O0")
 endif ()
-set(opt_base_compile_flags "${opt_compile_opt};-march=native;-v")
+set(opt_base_compile_flags "${opt_compile_opt};-v")
 set(omp_flag "-fopenmp")
 
 # C/C++ Language Standard
@@ -21,18 +21,23 @@ set(sources
         ""
 )
 
+# LD_LIBRARY
+find_package(ortools CONFIG REQUIRED)
+
 # Functions
 function(new_target target_name target_file)
     add_executable(${target_name} ${sources} ${target_file})
     target_compile_options(${target_name} PRIVATE
             ${opt_base_compile_flags} ${ARGN}
     )
+    target_link_libraries(${target_name} ortools::ortools)
 endfunction()
 
 # Targets
-new_target(reference reference_exact.cpp)
 new_target(program main.cpp)
+new_target(baseline baseline.cpp)
+new_target(reference reference_exact.c)
 new_target(benchmark bench.cpp)
 new_target(naive naive.cpp)
 new_target(improved naive_impv.cpp)
-new_target(test main.cpp ${omp_flag} "-DD1;-DD2;-DD3")
+#new_target(test main.cpp ${omp_flag} "-DD1;-DD2;-DD3")

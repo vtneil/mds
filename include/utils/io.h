@@ -8,7 +8,8 @@
 namespace io {
     constexpr const char *endl = "\n";
 
-    void print() {}
+    inline void print() {
+    }
 
     template<typename T, typename... Ts>
     void print(const T &val, const Ts &... vals) {
@@ -16,7 +17,7 @@ namespace io {
         print(vals...);
     }
 
-    void println() {
+    inline void println() {
         std::cout << endl;
     }
 
@@ -26,12 +27,16 @@ namespace io {
         println();
     }
 
+    inline void flush() {
+        std::cout.flush();
+    }
+
     FORCE_INLINE void unsync_stdio() {
         std::ios_base::sync_with_stdio(false);
         std::cin.tie(nullptr);
     }
 
-    template<bool Cond>
+    template<bool>
     FORCE_INLINE constexpr types::pointer_to_const<char> static_str() {
         return "true";
     }
@@ -41,7 +46,7 @@ namespace io {
         return "false";
     }
 
-    FORCE_INLINE constexpr types::pointer_to_const<char> to_str(bool value) {
+    FORCE_INLINE constexpr types::pointer_to_const<char> to_str(const bool value) {
         return value ? "true" : "false";
     }
 }

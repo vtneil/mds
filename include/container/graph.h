@@ -27,44 +27,42 @@ namespace container {
      * @tparam NumVertex Maximum number of vertices in a graph
      * @tparam NumEdgePerVertex Maximum number of edges per vertex (default: NumVertex)
      * @tparam EdgesArrayContainer Dynamic array container for edges
-     * @tparam GraphContainer
      */
     template<typename Integral,
-            types::size_type NumVertex,
-            types::size_type NumEdgePerVertex = NumVertex,
-            template<typename, types::size_type, template<typename, size_t = 0> class> class VertexArrayContainer = container::heap_array_t,
-            template<typename, types::size_type, template<typename, size_t = 0> class> class EdgesArrayContainer = container::heap_dynamic_array_t,
-            template<typename, types::size_type, template<typename, size_t = 0> class> class SetCoverArrayContainer = container::heap_array_t,
-            template<typename, size_t = 0> class Allocator = memory::NewAllocator
+        types::size_type NumVertex,
+        types::size_type NumEdgePerVertex = NumVertex,
+        template<typename, types::size_type, template<typename, size_t = 0> class> class VertexArrayContainer =
+        heap_array_t,
+        template<typename, types::size_type, template<typename, size_t = 0> class> class EdgesArrayContainer =
+        heap_dynamic_array_t,
+        template<typename, types::size_type, template<typename, size_t = 0> class> class SetCoverArrayContainer =
+        heap_array_t,
+        template<typename, size_t = 0> class Allocator = memory::NewAllocator
     >
     struct graph_t {
         using edges_container_t = EdgesArrayContainer<Integral, NumEdgePerVertex, Allocator>;
         using graph_container_t = VertexArrayContainer<edges_container_t, NumVertex, Allocator>;
-        using set_cover_t = SetCoverArrayContainer<container::bitset_t<NumEdgePerVertex, int_fast32_t>, NumVertex, Allocator>;
+        using set_cover_t = SetCoverArrayContainer<bitset_t<NumEdgePerVertex, int_fast32_t>, NumVertex, Allocator>;
         using deg_array_t = SetCoverArrayContainer<int, NumVertex, Allocator>;
-        using vertex_set_array_t = SetCoverArrayContainer<vertex_set, NumVertex, Allocator>;
-        using unique_vertex_array_t = EdgesArrayContainer<typename Integral::type, NumVertex, Allocator>;
 
         graph_container_t list = {};
-        vertex_set_array_t set = {};
         set_cover_t matrix = {};
-        unique_vertex_array_t unique = {};
         deg_array_t degrees = {};
 
         typename Integral::type v;
         typename Integral::type e;
 
-        template<typename ...Integrals>
-        constexpr void push_nodes(graph_node<Integrals> ...nodes) {
+        template<typename... Integrals>
+        constexpr void push_nodes(graph_node<Integrals>... nodes) {
             push_nodes({nodes...});
         }
 
-        constexpr void push_nodes(std::initializer_list<graph_node<Integral>> nodes) {
+        constexpr void push_nodes(std::initializer_list<graph_node<Integral> > nodes) {
             for (const auto &node: nodes)
                 push_nodes(node);
         }
 
-        constexpr void push_nodes(types::const_reference<graph_node<Integral>> node) {
+        constexpr void push_nodes(types::const_reference<graph_node<Integral> > node) {
             list[node.vertex.value].push_back(node.edges);
 
             matrix[node.vertex.value].set(node.vertex.value, true);
@@ -125,74 +123,29 @@ namespace container {
             return true;
         }
 
-        void unionize(graph_t &dst) {
-            bool stop_flag = false;
+        [[nodiscard]] float density() const {
+            return 2.f * static_cast<float>(e) / (static_cast<float>(v) * static_cast<float>(v - 1));
+        }
 
-            // Unionize by setting this graph (will be unusable)
-            while (!stop_flag) {
+        [[nodiscard]] float mean_degrees() const {
+            return static_cast<float>(degrees.sum()) / static_cast<float>(v);
+        }
 
-                stop_flag = true;
+        [[nodiscard]] float variance_degrees() const {
+            float acc = 0.f;
+            const float mu = mean_degrees();
 
-                // C(v, 2) combinatorial pair
-                for (typename Integral::type v2 = 0; v2 < v; ++v2) {
-                    for (typename Integral::type v1 = 0; v1 < v2; ++v1) {
-
-                        if (static_cast<int_fast8_t>(set[v1]) || static_cast<int_fast8_t>(set[v2]))
-                            continue;
-
-                        bitset_compare cmp = matrix[v1].compare(matrix[v2]);
-
-                        switch (cmp) {
-                            case bitset_compare::NO_COVER:
-                                break;
-                            case bitset_compare::COVERS:
-                                set[v2] = vertex_set::BLUE;
-                                stop_flag = false;
-                                break;
-                            case bitset_compare::COVERED_BY:
-                                set[v1] = vertex_set::BLUE;
-                                stop_flag = false;
-                                break;
-                            default:
-                                UNREACHABLE();
-                        }
-
-                    }
-                }
+            for (typename Integral::type i = 0; i < v; ++i) {
+                acc += (static_cast<float>(degrees[i]) - mu) * (static_cast<float>(degrees[i]) - mu);
             }
 
-            SetCoverArrayContainer<typename Integral::type, NumVertex, Allocator> reverse_v_map = {};
+            return acc / static_cast<float>(v);
+        }
 
-            dst.v = 0;
-
-            for (typename Integral::type i = 0, pos = 0; i < v; ++i) {
-                if (set[i] == vertex_set::RED) {
-                    reverse_v_map[i] = pos++;
-                    unique.push_back(i);
-                    ++dst.v;
-                }
-            }
-
-            for (typename Integral::type i = 0; i < unique.size(); ++i) {
-                for (typename Integral::type j = 0; j < v; ++j) {
-                    if (i != reverse_v_map[j] && set[j] == vertex_set::RED && matrix[unique[i]].get(j)) {
-                        dst.push_nodes(container::graph_node<Integral>{i, {reverse_v_map[j]}});
-                        dst.push_nodes(container::graph_node<Integral>{reverse_v_map[j], {i}});
-                    }
-                }
-            }
+        [[nodiscard]] float dispersion() const {
+            return variance_degrees() / mean_degrees();
         }
     };
-}
-
-namespace graph_utils {
-    float density(long v, long e) {
-        return 2.f * static_cast<float>(e) / (static_cast<float>(v) * static_cast<float>(v - 1));
-    }
-
-    float dispersion(long v, long e) {
-        float mean = 2.f * static_cast<float>(e) / static_cast<float>(v);
-    }
 }
 
 #endif //HPA_2110452_MIN_DOM_SET_GRAPH_H
