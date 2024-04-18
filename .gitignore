@@ -2,3 +2,5 @@ cmake-*
 build*
 data*
 executables*
+.git
+.idea
