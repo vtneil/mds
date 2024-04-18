@@ -15,7 +15,7 @@ using edges_t = vector_t<vertex_t>;
 using graph_t = vector_t<edges_t>;
 
 graph_t graph;
-edges_t solution;
+edges_t sol;
 
 void read_graph_from_file(types::const_pointer_to_const<char> filename) {
     std::ifstream stream(filename);
@@ -43,9 +43,8 @@ void read_graph_from_file(types::const_pointer_to_const<char> filename) {
     stream.close();
 }
 
-std::mutex solver_mutex;
+std::mutex mtx;
 std::condition_variable cv;
-bool solution_found = false;
 
 namespace operations_research {
     void solve_mds(
@@ -59,12 +58,10 @@ namespace operations_research {
 
         const auto n = static_cast<vertex_t>(graph.size());
         vector_t<const MPVariable *> x(n);
-        solution.resize(n, 0);
 
         // Variables
-        for (vertex_t i = 0; i < n; ++i) {
+        for (vertex_t i = 0; i < n; ++i)
             x[i] = solver.MakeBoolVar(std::to_string(i));
-        }
 
         // Constraints
         for (vertex_t i = 0; i < n; ++i) {
@@ -77,24 +74,17 @@ namespace operations_research {
 
         // Objective
         types::reference<MPObjective> objective = *solver.MutableObjective();
-        for (vertex_t i = 0; i < n; ++i) {
-            objective.SetCoefficient(x[i], 1);
-        }
         objective.SetOptimizationDirection(false);
+        for (vertex_t i = 0; i < n; ++i)
+            objective.SetCoefficient(x[i], 1);
 
         // Solve
-        std::unique_lock<std::mutex> lock(solver_mutex);
-        if (!solution_found) {
-            lock.unlock();
-            const MPSolver::ResultStatus status = solver.Solve();
-            lock.lock();
-
-            if (status == MPSolver::OPTIMAL && !solution_found) {
-                solution_found = true;
-                cv.notify_all();
-                for (vertex_t i = 0; i < n; ++i)
-                    solution[i] = static_cast<int>(x[i]->solution_value());
-            }
+        if (solver.Solve() == MPSolver::OPTIMAL) {
+            std::lock_guard<std::mutex> lock(mtx);
+            cv.notify_one();
+            sol.resize(n);
+            for (vertex_t i = 0; i < n; ++i)
+                sol[i] = static_cast<int>(x[i]->solution_value());
         }
     }
 }
@@ -109,44 +99,42 @@ int main(const int argc, char **argv) {
     // Solver workers
     std::thread solvers[] = {
         std::thread(
-            operations_research::solve_mds,
-            "BOP Solver",
+            operations_research::solve_mds, "BOP Solver",
             operations_research::MPSolver::BOP_INTEGER_PROGRAMMING
         ),
         std::thread(
-            operations_research::solve_mds,
-            "CBC Solver",
+            operations_research::solve_mds, "CBC Solver",
             operations_research::MPSolver::CBC_MIXED_INTEGER_PROGRAMMING
         ),
         std::thread(
-            operations_research::solve_mds,
-            "SAT Solver",
+            operations_research::solve_mds, "SAT Solver",
             operations_research::MPSolver::SAT_INTEGER_PROGRAMMING
         ),
         std::thread(
-            operations_research::solve_mds,
-            "SCIP Solver",
+            operations_research::solve_mds, "SCIP Solver",
             operations_research::MPSolver::SCIP_MIXED_INTEGER_PROGRAMMING
         )
     };
 
     // Wait for finish and detach threads
-    std::mutex mtx;
-    std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [] { return solution_found; });
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock);
+    }
 
-    // Detach all threads (guaranteed to stop)
-    for (auto &thread: solvers)
-        thread.detach();
+    // Detach all threads immediately
+    // (guaranteed to stop at some point in time)
+    for (auto &solver: solvers)
+        solver.detach();
 
-    // Show the result
+    // Write the result to output file
     std::ofstream file(argv[2]);
-    if (!file.is_open()) {
+    if (!file.is_open())
         return 1;
-    }
-    for (const vertex_t i: solution) {
+
+    for (const vertex_t i: sol)
         file << i;
-    }
+
     file.close();
 
     return 0;
