@@ -34,6 +34,7 @@ function(new_target target_name target_file)
 endfunction()
 
 # Targets
+new_target(hello hello.cpp)
 new_target(program main.cpp)
 new_target(baseline baseline.cpp)
 new_target(reference reference_exact.c)

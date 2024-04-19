@@ -55,11 +55,9 @@ FROM debian:sid-slim as runner
 
 WORKDIR /
 
-RUN apt-get update && apt-get install -y libstdc++6
+COPY --from=compiler /program /
 
 COPY --from=compiler /usr/local/lib/ /usr/local/lib/
-
-COPY --from=compiler /program /
 
 RUN ldconfig /usr/local/lib/
 

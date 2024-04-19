@@ -13,8 +13,7 @@
 
 graph_t graph;
 edges_t sol;
-std::mutex mtx;
-std::condition_variable cv;
+std::atomic_bool solved(false);
 
 
 int main(const int argc, char **argv) {
@@ -37,21 +36,11 @@ int main(const int argc, char **argv) {
         std::thread(
             operations_research::solve_mds_with_cp<true>, "CP-SAT Solver"
         ),
-        std::thread(
-            operations_research::solve_mds<true>, "SAT Solver",
-            operations_research::MPSolver::SAT_INTEGER_PROGRAMMING
-        ),
-        std::thread(
-            operations_research::solve_mds<true>, "SCIP Solver",
-            operations_research::MPSolver::SCIP_MIXED_INTEGER_PROGRAMMING
-        ),
     };
 
     // Wait for finish and detach threads
-    {
-        std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock);
-    }
+    while (!solved.load(std::memory_order_acquire))
+        std::this_thread::yield();
 
     // Detach all threads immediately
     // (guaranteed to stop at some point in time)
@@ -63,11 +52,10 @@ int main(const int argc, char **argv) {
     if (!file.is_open())
         return 1;
 
-    for (const vertex_t i: sol) {
+    for (const vertex_t i: sol)
         file << i;
-    }
 
     file.close();
 
-    return 0;
+    std::exit(0);
 }

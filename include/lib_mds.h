@@ -19,8 +19,7 @@ using graph_t = vector_t<edges_t>;
 
 extern graph_t graph;
 extern edges_t sol;
-extern std::mutex mtx;
-extern std::condition_variable cv;
+extern std::atomic_bool solved;
 
 inline void read_graph_from_file(types::const_pointer_to_const<char> filename) {
     std::ifstream stream(filename);
@@ -83,11 +82,8 @@ namespace operations_research {
             objective.SetCoefficient(x[i], 1);
 
         // Solve
-        if (solver.Solve() == MPSolver::OPTIMAL) {
-            if constexpr (with_lock) {
-                std::lock_guard<std::mutex> lock(mtx);
-                cv.notify_one();
-            }
+        if (!solved && solver.Solve() == MPSolver::OPTIMAL) {
+            solved.store(true, std::memory_order_release);
             sol.resize(n);
             for (vertex_t i = 0; i < n; ++i)
                 sol[i] = static_cast<int>(x[i]->solution_value());
@@ -125,12 +121,10 @@ namespace operations_research {
 
         // Solve
         if (const sat::CpSolverResponse response = sat::Solve(cp_model.Build());
-            response.status() == sat::CpSolverStatus::OPTIMAL || response.status() == sat::CpSolverStatus::FEASIBLE
+            !solved && (response.status() == sat::CpSolverStatus::OPTIMAL ||
+                        response.status() == sat::CpSolverStatus::FEASIBLE)
         ) {
-            if constexpr (with_lock) {
-                std::lock_guard<std::mutex> lock(mtx);
-                cv.notify_one();
-            }
+            solved.store(true, std::memory_order_release);
             sol.resize(n);
             for (vertex_t i = 0; i < n; ++i)
                 sol[i] = sat::SolutionBooleanValue(response, x[i]);
