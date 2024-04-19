@@ -25,6 +25,8 @@ RUN apt-get update && apt-get install -y \
 # LLVM Clang
 RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && bash ./llvm.sh 18
 
+RUN rm -f ./llvm.sh
+
 # Set default compiler
 ENV CC="/usr/bin/clang-18"
 ENV CXX="/usr/bin/clang++-18"
@@ -35,11 +37,13 @@ RUN git clone --depth 1 https://github.com/google/or-tools.git
 RUN cd or-tools && mkdir build && cd build && \
     cmake .. -DBUILD_DEPS=ON && \
     make -j $(nproc) && \
-    make install
+    make install \
+
+RUN rm -rf ./or-tools
 
 FROM builder as compiler
 
-WORKDIR /app/
+WORKDIR /src/
 
 COPY . .
 
@@ -47,8 +51,14 @@ RUN mkdir build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make program
 
+RUN cp ./build/program /
+
+WORKDIR /
+
+RUN rm -rf ./src
+
 FROM compiler as runner
 
-WORKDIR /app/
+WORKDIR /
 
-ENTRYPOINT ["./build/program"]
+ENTRYPOINT ["./program"]
