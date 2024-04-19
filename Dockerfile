@@ -34,10 +34,15 @@ ENV CXX="/usr/bin/clang++-18"
 # OR-Tools
 RUN git clone --depth 1 https://github.com/google/or-tools.git
 
-RUN cd or-tools && mkdir build && cd build && \
-    cmake .. -DBUILD_DEPS=ON && \
-    make -j $(nproc) && \
-    make install \
+WORKDIR /or-tools/build/
+
+RUN cmake .. -DBUILD_DEPS=ON
+
+RUN make -j $(nproc)
+
+RUN make install
+
+WORKDIR /
 
 RUN rm -rf ./or-tools
 

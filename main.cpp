@@ -24,7 +24,7 @@ int main(const int argc, char **argv) {
     // Graph Initialization
     read_graph_from_file(argv[1]);
 
-    // Solver workers
+    // Solver workers (sorted by its potential to finish first)
     std::thread solvers[] = {
         std::thread(
             operations_research::solve_mds<true>, "BOP Solver",
@@ -35,15 +35,15 @@ int main(const int argc, char **argv) {
             operations_research::MPSolver::CBC_MIXED_INTEGER_PROGRAMMING
         ),
         std::thread(
+            operations_research::solve_mds_with_cp<true>, "CP-SAT Solver"
+        ),
+        std::thread(
             operations_research::solve_mds<true>, "SAT Solver",
             operations_research::MPSolver::SAT_INTEGER_PROGRAMMING
         ),
         std::thread(
             operations_research::solve_mds<true>, "SCIP Solver",
             operations_research::MPSolver::SCIP_MIXED_INTEGER_PROGRAMMING
-        ),
-        std::thread(
-            operations_research::solve_mds_with_cp<true>, "CP-SAT Solver"
         ),
     };
 
