@@ -125,7 +125,8 @@ namespace operations_research {
 
         // Solve
         if (const sat::CpSolverResponse response = sat::Solve(cp_model.Build());
-            response.status() == sat::CpSolverStatus::OPTIMAL) {
+            response.status() == sat::CpSolverStatus::OPTIMAL || response.status() == sat::CpSolverStatus::FEASIBLE
+        ) {
             if constexpr (with_lock) {
                 std::lock_guard<std::mutex> lock(mtx);
                 cv.notify_one();
