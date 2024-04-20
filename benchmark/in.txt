@@ -1,0 +1,371 @@
+./data/input/grid-100-180
+Time taken for procedure "I/O & Graph Initialization": 46 microseconds.
+Time taken for procedure "BOP Backend": 94777 microseconds.
+Time taken for procedure "CBC Backend": 520732 microseconds.
+Time taken for procedure "SCIP Backend": 309492 microseconds.
+Time taken for procedure "SAT Backend": 195508 microseconds.
+Time taken for procedure "CP-SAT Model": 212990 microseconds.
+./data/input/grid-12-17
+Time taken for procedure "I/O & Graph Initialization": 24 microseconds.
+Time taken for procedure "BOP Backend": 1413 microseconds.
+Time taken for procedure "CBC Backend": 2486 microseconds.
+Time taken for procedure "SCIP Backend": 5495 microseconds.
+Time taken for procedure "SAT Backend": 5502 microseconds.
+Time taken for procedure "CP-SAT Model": 2243 microseconds.
+./data/input/grid-16-24
+Time taken for procedure "I/O & Graph Initialization": 49 microseconds.
+Time taken for procedure "BOP Backend": 2803 microseconds.
+Time taken for procedure "CBC Backend": 3344 microseconds.
+Time taken for procedure "SCIP Backend": 3347 microseconds.
+Time taken for procedure "SAT Backend": 5560 microseconds.
+Time taken for procedure "CP-SAT Model": 3173 microseconds.
+./data/input/grid-20-31
+Time taken for procedure "I/O & Graph Initialization": 32 microseconds.
+Time taken for procedure "BOP Backend": 3170 microseconds.
+Time taken for procedure "CBC Backend": 2517 microseconds.
+Time taken for procedure "SCIP Backend": 6756 microseconds.
+Time taken for procedure "SAT Backend": 5146 microseconds.
+Time taken for procedure "CP-SAT Model": 5457 microseconds.
+./data/input/grid-25-40
+Time taken for procedure "I/O & Graph Initialization": 22 microseconds.
+Time taken for procedure "BOP Backend": 4927 microseconds.
+Time taken for procedure "CBC Backend": 6185 microseconds.
+Time taken for procedure "SCIP Backend": 21552 microseconds.
+Time taken for procedure "SAT Backend": 7145 microseconds.
+Time taken for procedure "CP-SAT Model": 4702 microseconds.
+./data/input/grid-30-49
+Time taken for procedure "I/O & Graph Initialization": 29 microseconds.
+Time taken for procedure "BOP Backend": 7612 microseconds.
+Time taken for procedure "CBC Backend": 5009 microseconds.
+Time taken for procedure "SCIP Backend": 18162 microseconds.
+Time taken for procedure "SAT Backend": 8999 microseconds.
+Time taken for procedure "CP-SAT Model": 6187 microseconds.
+./data/input/grid-40-67
+Time taken for procedure "I/O & Graph Initialization": 29 microseconds.
+Time taken for procedure "BOP Backend": 23213 microseconds.
+Time taken for procedure "CBC Backend": 20330 microseconds.
+Time taken for procedure "SCIP Backend": 11681 microseconds.
+Time taken for procedure "SAT Backend": 31486 microseconds.
+Time taken for procedure "CP-SAT Model": 8773 microseconds.
+./data/input/grid-49-84
+Time taken for procedure "I/O & Graph Initialization": 26 microseconds.
+Time taken for procedure "BOP Backend": 21159 microseconds.
+Time taken for procedure "CBC Backend": 9318 microseconds.
+Time taken for procedure "SCIP Backend": 95040 microseconds.
+Time taken for procedure "SAT Backend": 17599 microseconds.
+Time taken for procedure "CP-SAT Model": 12657 microseconds.
+./data/input/grid-56-97
+Time taken for procedure "I/O & Graph Initialization": 31 microseconds.
+Time taken for procedure "BOP Backend": 32112 microseconds.
+Time taken for procedure "CBC Backend": 23620 microseconds.
+Time taken for procedure "SCIP Backend": 140493 microseconds.
+Time taken for procedure "SAT Backend": 31770 microseconds.
+Time taken for procedure "CP-SAT Model": 18888 microseconds.
+./data/input/grid-6-7
+Time taken for procedure "I/O & Graph Initialization": 23 microseconds.
+Time taken for procedure "BOP Backend": 1136 microseconds.
+Time taken for procedure "CBC Backend": 1790 microseconds.
+Time taken for procedure "SCIP Backend": 3214 microseconds.
+Time taken for procedure "SAT Backend": 4205 microseconds.
+Time taken for procedure "CP-SAT Model": 2249 microseconds.
+./data/input/grid-60-104
+Time taken for procedure "I/O & Graph Initialization": 36 microseconds.
+Time taken for procedure "BOP Backend": 38712 microseconds.
+Time taken for procedure "CBC Backend": 256894 microseconds.
+Time taken for procedure "SCIP Backend": 207068 microseconds.
+Time taken for procedure "SAT Backend": 39773 microseconds.
+Time taken for procedure "CP-SAT Model": 51292 microseconds.
+./data/input/grid-72-127
+Time taken for procedure "I/O & Graph Initialization": 31 microseconds.
+Time taken for procedure "BOP Backend": 40474 microseconds.
+Time taken for procedure "CBC Backend": 268985 microseconds.
+Time taken for procedure "SCIP Backend": 299928 microseconds.
+Time taken for procedure "SAT Backend": 73021 microseconds.
+Time taken for procedure "CP-SAT Model": 38099 microseconds.
+./data/input/grid-81-144
+Time taken for procedure "I/O & Graph Initialization": 38 microseconds.
+Time taken for procedure "BOP Backend": 46433 microseconds.
+Time taken for procedure "CBC Backend": 374906 microseconds.
+Time taken for procedure "SCIP Backend": 354750 microseconds.
+Time taken for procedure "SAT Backend": 58383 microseconds.
+Time taken for procedure "CP-SAT Model": 33005 microseconds.
+./data/input/grid-9-12
+Time taken for procedure "I/O & Graph Initialization": 45 microseconds.
+Time taken for procedure "BOP Backend": 1524 microseconds.
+Time taken for procedure "CBC Backend": 2997 microseconds.
+Time taken for procedure "SCIP Backend": 3274 microseconds.
+Time taken for procedure "SAT Backend": 4820 microseconds.
+Time taken for procedure "CP-SAT Model": 3508 microseconds.
+./data/input/rand-10-15
+Time taken for procedure "I/O & Graph Initialization": 22 microseconds.
+Time taken for procedure "BOP Backend": 1240 microseconds.
+Time taken for procedure "CBC Backend": 2067 microseconds.
+Time taken for procedure "SCIP Backend": 3533 microseconds.
+Time taken for procedure "SAT Backend": 3533 microseconds.
+Time taken for procedure "CP-SAT Model": 2434 microseconds.
+./data/input/rand-15-28
+Time taken for procedure "I/O & Graph Initialization": 26 microseconds.
+Time taken for procedure "BOP Backend": 1449 microseconds.
+Time taken for procedure "CBC Backend": 3136 microseconds.
+Time taken for procedure "SCIP Backend": 3986 microseconds.
+Time taken for procedure "SAT Backend": 5039 microseconds.
+Time taken for procedure "CP-SAT Model": 2719 microseconds.
+./data/input/rand-20-40
+Time taken for procedure "I/O & Graph Initialization": 20 microseconds.
+Time taken for procedure "BOP Backend": 2212 microseconds.
+Time taken for procedure "CBC Backend": 2565 microseconds.
+Time taken for procedure "SCIP Backend": 5173 microseconds.
+Time taken for procedure "SAT Backend": 6471 microseconds.
+Time taken for procedure "CP-SAT Model": 4325 microseconds.
+./data/input/rand-25-50
+Time taken for procedure "I/O & Graph Initialization": 23 microseconds.
+Time taken for procedure "BOP Backend": 2232 microseconds.
+Time taken for procedure "CBC Backend": 2076 microseconds.
+Time taken for procedure "SCIP Backend": 3044 microseconds.
+Time taken for procedure "SAT Backend": 7730 microseconds.
+Time taken for procedure "CP-SAT Model": 4119 microseconds.
+./data/input/rand-30-120
+Time taken for procedure "I/O & Graph Initialization": 39 microseconds.
+Time taken for procedure "BOP Backend": 20905 microseconds.
+Time taken for procedure "CBC Backend": 121226 microseconds.
+Time taken for procedure "SCIP Backend": 62654 microseconds.
+Time taken for procedure "SAT Backend": 11682 microseconds.
+Time taken for procedure "CP-SAT Model": 7872 microseconds.
+./data/input/rand-30-60
+Time taken for procedure "I/O & Graph Initialization": 38 microseconds.
+Time taken for procedure "BOP Backend": 5288 microseconds.
+Time taken for procedure "CBC Backend": 3624 microseconds.
+Time taken for procedure "SCIP Backend": 3683 microseconds.
+Time taken for procedure "SAT Backend": 4461 microseconds.
+Time taken for procedure "CP-SAT Model": 4440 microseconds.
+./data/input/rand-35-140
+Time taken for procedure "I/O & Graph Initialization": 30 microseconds.
+Time taken for procedure "BOP Backend": 28545 microseconds.
+Time taken for procedure "CBC Backend": 136840 microseconds.
+Time taken for procedure "SCIP Backend": 77498 microseconds.
+Time taken for procedure "SAT Backend": 11753 microseconds.
+Time taken for procedure "CP-SAT Model": 17964 microseconds.
+./data/input/rand-40-160
+Time taken for procedure "I/O & Graph Initialization": 33 microseconds.
+Time taken for procedure "BOP Backend": 9719 microseconds.
+Time taken for procedure "CBC Backend": 3660 microseconds.
+Time taken for procedure "SCIP Backend": 5703 microseconds.
+Time taken for procedure "SAT Backend": 9198 microseconds.
+Time taken for procedure "CP-SAT Model": 4966 microseconds.
+./data/input/rand-40-80
+Time taken for procedure "I/O & Graph Initialization": 36 microseconds.
+Time taken for procedure "BOP Backend": 6624 microseconds.
+Time taken for procedure "CBC Backend": 5227 microseconds.
+Time taken for procedure "SCIP Backend": 27650 microseconds.
+Time taken for procedure "SAT Backend": 8362 microseconds.
+Time taken for procedure "CP-SAT Model": 6622 microseconds.
+./data/input/rand-45-180
+Time taken for procedure "I/O & Graph Initialization": 29 microseconds.
+Time taken for procedure "BOP Backend": 42678 microseconds.
+Time taken for procedure "CBC Backend": 146133 microseconds.
+Time taken for procedure "SCIP Backend": 231422 microseconds.
+Time taken for procedure "SAT Backend": 26734 microseconds.
+Time taken for procedure "CP-SAT Model": 28623 microseconds.
+./data/input/rand-5-7
+Time taken for procedure "I/O & Graph Initialization": 24 microseconds.
+Time taken for procedure "BOP Backend": 1457 microseconds.
+Time taken for procedure "CBC Backend": 2441 microseconds.
+Time taken for procedure "SCIP Backend": 3096 microseconds.
+Time taken for procedure "SAT Backend": 6653 microseconds.
+Time taken for procedure "CP-SAT Model": 3332 microseconds.
+./data/input/rand-50-200
+Time taken for procedure "I/O & Graph Initialization": 31 microseconds.
+Time taken for procedure "BOP Backend": 48044 microseconds.
+Time taken for procedure "CBC Backend": 15900 microseconds.
+Time taken for procedure "SCIP Backend": 45943 microseconds.
+Time taken for procedure "SAT Backend": 37309 microseconds.
+Time taken for procedure "CP-SAT Model": 20191 microseconds.
+./data/input/rand-60-250
+Time taken for procedure "I/O & Graph Initialization": 53 microseconds.
+Time taken for procedure "BOP Backend": 5.52523e+06 microseconds.
+Time taken for procedure "CBC Backend": 282644 microseconds.
+Time taken for procedure "SCIP Backend": 206328 microseconds.
+Time taken for procedure "SAT Backend": 122583 microseconds.
+Time taken for procedure "CP-SAT Model": 118237 microseconds.
+./data/input/rand-70-300
+Time taken for procedure "I/O & Graph Initialization": 67 microseconds.
+Time taken for procedure "BOP Backend": 2.41363e+07 microseconds.
+Time taken for procedure "CBC Backend": 384430 microseconds.
+Time taken for procedure "SCIP Backend": 336353 microseconds.
+Time taken for procedure "SAT Backend": 206708 microseconds.
+Time taken for procedure "CP-SAT Model": 159145 microseconds.
+./data/input/rand-80-350
+Time taken for procedure "I/O & Graph Initialization": 37 microseconds.
+Time taken for procedure "BOP Backend": 1.24695e+07 microseconds.
+Time taken for procedure "CBC Backend": 440266 microseconds.
+Time taken for procedure "SCIP Backend": 321328 microseconds.
+Time taken for procedure "SAT Backend": 220565 microseconds.
+Time taken for procedure "CP-SAT Model": 159848 microseconds.
+./data/input/ring-10-10
+Time taken for procedure "I/O & Graph Initialization": 21 microseconds.
+Time taken for procedure "BOP Backend": 1493 microseconds.
+Time taken for procedure "CBC Backend": 2014 microseconds.
+Time taken for procedure "SCIP Backend": 3159 microseconds.
+Time taken for procedure "SAT Backend": 4525 microseconds.
+Time taken for procedure "CP-SAT Model": 2485 microseconds.
+./data/input/ring-100-100
+Time taken for procedure "I/O & Graph Initialization": 40 microseconds.
+Time taken for procedure "BOP Backend": 22852 microseconds.
+Time taken for procedure "CBC Backend": 6666 microseconds.
+Time taken for procedure "SCIP Backend": 19198 microseconds.
+Time taken for procedure "SAT Backend": 28455 microseconds.
+Time taken for procedure "CP-SAT Model": 26216 microseconds.
+./data/input/ring-15-15
+Time taken for procedure "I/O & Graph Initialization": 27 microseconds.
+Time taken for procedure "BOP Backend": 1295 microseconds.
+Time taken for procedure "CBC Backend": 3834 microseconds.
+Time taken for procedure "SCIP Backend": 4781 microseconds.
+Time taken for procedure "SAT Backend": 7424 microseconds.
+Time taken for procedure "CP-SAT Model": 2900 microseconds.
+./data/input/ring-20-20
+Time taken for procedure "I/O & Graph Initialization": 22 microseconds.
+Time taken for procedure "BOP Backend": 2563 microseconds.
+Time taken for procedure "CBC Backend": 3795 microseconds.
+Time taken for procedure "SCIP Backend": 6506 microseconds.
+Time taken for procedure "SAT Backend": 7504 microseconds.
+Time taken for procedure "CP-SAT Model": 4852 microseconds.
+./data/input/ring-25-25
+Time taken for procedure "I/O & Graph Initialization": 22 microseconds.
+Time taken for procedure "BOP Backend": 4487 microseconds.
+Time taken for procedure "CBC Backend": 3377 microseconds.
+Time taken for procedure "SCIP Backend": 5401 microseconds.
+Time taken for procedure "SAT Backend": 8470 microseconds.
+Time taken for procedure "CP-SAT Model": 4565 microseconds.
+./data/input/ring-30-30
+Time taken for procedure "I/O & Graph Initialization": 24 microseconds.
+Time taken for procedure "BOP Backend": 4870 microseconds.
+Time taken for procedure "CBC Backend": 2422 microseconds.
+Time taken for procedure "SCIP Backend": 3248 microseconds.
+Time taken for procedure "SAT Backend": 5226 microseconds.
+Time taken for procedure "CP-SAT Model": 4557 microseconds.
+./data/input/ring-35-35
+Time taken for procedure "I/O & Graph Initialization": 22 microseconds.
+Time taken for procedure "BOP Backend": 4552 microseconds.
+Time taken for procedure "CBC Backend": 3735 microseconds.
+Time taken for procedure "SCIP Backend": 14541 microseconds.
+Time taken for procedure "SAT Backend": 5928 microseconds.
+Time taken for procedure "CP-SAT Model": 4082 microseconds.
+./data/input/ring-40-40
+Time taken for procedure "I/O & Graph Initialization": 32 microseconds.
+Time taken for procedure "BOP Backend": 11544 microseconds.
+Time taken for procedure "CBC Backend": 3849 microseconds.
+Time taken for procedure "SCIP Backend": 14965 microseconds.
+Time taken for procedure "SAT Backend": 13266 microseconds.
+Time taken for procedure "CP-SAT Model": 8886 microseconds.
+./data/input/ring-5-5
+Time taken for procedure "I/O & Graph Initialization": 28 microseconds.
+Time taken for procedure "BOP Backend": 1204 microseconds.
+Time taken for procedure "CBC Backend": 2693 microseconds.
+Time taken for procedure "SCIP Backend": 3791 microseconds.
+Time taken for procedure "SAT Backend": 5739 microseconds.
+Time taken for procedure "CP-SAT Model": 1911 microseconds.
+./data/input/ring-50-50
+Time taken for procedure "I/O & Graph Initialization": 29 microseconds.
+Time taken for procedure "BOP Backend": 12352 microseconds.
+Time taken for procedure "CBC Backend": 5191 microseconds.
+Time taken for procedure "SCIP Backend": 14094 microseconds.
+Time taken for procedure "SAT Backend": 9355 microseconds.
+Time taken for procedure "CP-SAT Model": 6070 microseconds.
+./data/input/ring-60-60
+Time taken for procedure "I/O & Graph Initialization": 43 microseconds.
+Time taken for procedure "BOP Backend": 6838 microseconds.
+Time taken for procedure "CBC Backend": 2708 microseconds.
+Time taken for procedure "SCIP Backend": 4407 microseconds.
+Time taken for procedure "SAT Backend": 9389 microseconds.
+Time taken for procedure "CP-SAT Model": 5389 microseconds.
+./data/input/ring-75-75
+Time taken for procedure "I/O & Graph Initialization": 33 microseconds.
+Time taken for procedure "BOP Backend": 16317 microseconds.
+Time taken for procedure "CBC Backend": 3333 microseconds.
+Time taken for procedure "SCIP Backend": 3807 microseconds.
+Time taken for procedure "SAT Backend": 21587 microseconds.
+Time taken for procedure "CP-SAT Model": 7121 microseconds.
+./data/input/tree-10-9
+Time taken for procedure "I/O & Graph Initialization": 36 microseconds.
+Time taken for procedure "BOP Backend": 1420 microseconds.
+Time taken for procedure "CBC Backend": 2567 microseconds.
+Time taken for procedure "SCIP Backend": 2913 microseconds.
+Time taken for procedure "SAT Backend": 3467 microseconds.
+Time taken for procedure "CP-SAT Model": 2173 microseconds.
+./data/input/tree-100-99
+Time taken for procedure "I/O & Graph Initialization": 34 microseconds.
+Time taken for procedure "BOP Backend": 18418 microseconds.
+Time taken for procedure "CBC Backend": 3547 microseconds.
+Time taken for procedure "SCIP Backend": 3621 microseconds.
+Time taken for procedure "SAT Backend": 5029 microseconds.
+Time taken for procedure "CP-SAT Model": 5279 microseconds.
+./data/input/tree-15-14
+Time taken for procedure "I/O & Graph Initialization": 40 microseconds.
+Time taken for procedure "BOP Backend": 1391 microseconds.
+Time taken for procedure "CBC Backend": 2490 microseconds.
+Time taken for procedure "SCIP Backend": 3089 microseconds.
+Time taken for procedure "SAT Backend": 5517 microseconds.
+Time taken for procedure "CP-SAT Model": 2314 microseconds.
+./data/input/tree-20-19
+Time taken for procedure "I/O & Graph Initialization": 23 microseconds.
+Time taken for procedure "BOP Backend": 1997 microseconds.
+Time taken for procedure "CBC Backend": 2303 microseconds.
+Time taken for procedure "SCIP Backend": 5523 microseconds.
+Time taken for procedure "SAT Backend": 5337 microseconds.
+Time taken for procedure "CP-SAT Model": 7543 microseconds.
+./data/input/tree-25-24
+Time taken for procedure "I/O & Graph Initialization": 39 microseconds.
+Time taken for procedure "BOP Backend": 1857 microseconds.
+Time taken for procedure "CBC Backend": 2886 microseconds.
+Time taken for procedure "SCIP Backend": 3412 microseconds.
+Time taken for procedure "SAT Backend": 4891 microseconds.
+Time taken for procedure "CP-SAT Model": 3723 microseconds.
+./data/input/tree-30-29
+Time taken for procedure "I/O & Graph Initialization": 26 microseconds.
+Time taken for procedure "BOP Backend": 4721 microseconds.
+Time taken for procedure "CBC Backend": 3569 microseconds.
+Time taken for procedure "SCIP Backend": 3109 microseconds.
+Time taken for procedure "SAT Backend": 4357 microseconds.
+Time taken for procedure "CP-SAT Model": 2709 microseconds.
+./data/input/tree-35-34
+Time taken for procedure "I/O & Graph Initialization": 26 microseconds.
+Time taken for procedure "BOP Backend": 4609 microseconds.
+Time taken for procedure "CBC Backend": 2260 microseconds.
+Time taken for procedure "SCIP Backend": 4189 microseconds.
+Time taken for procedure "SAT Backend": 4631 microseconds.
+Time taken for procedure "CP-SAT Model": 3578 microseconds.
+./data/input/tree-40-39
+Time taken for procedure "I/O & Graph Initialization": 32 microseconds.
+Time taken for procedure "BOP Backend": 5153 microseconds.
+Time taken for procedure "CBC Backend": 2216 microseconds.
+Time taken for procedure "SCIP Backend": 3109 microseconds.
+Time taken for procedure "SAT Backend": 7012 microseconds.
+Time taken for procedure "CP-SAT Model": 4568 microseconds.
+./data/input/tree-5-4
+Time taken for procedure "I/O & Graph Initialization": 19 microseconds.
+Time taken for procedure "BOP Backend": 1073 microseconds.
+Time taken for procedure "CBC Backend": 1663 microseconds.
+Time taken for procedure "SCIP Backend": 2542 microseconds.
+Time taken for procedure "SAT Backend": 6133 microseconds.
+Time taken for procedure "CP-SAT Model": 2303 microseconds.
+./data/input/tree-50-49
+Time taken for procedure "I/O & Graph Initialization": 34 microseconds.
+Time taken for procedure "BOP Backend": 6222 microseconds.
+Time taken for procedure "CBC Backend": 2692 microseconds.
+Time taken for procedure "SCIP Backend": 3846 microseconds.
+Time taken for procedure "SAT Backend": 3898 microseconds.
+Time taken for procedure "CP-SAT Model": 5114 microseconds.
+./data/input/tree-60-59
+Time taken for procedure "I/O & Graph Initialization": 38 microseconds.
+Time taken for procedure "BOP Backend": 12755 microseconds.
+Time taken for procedure "CBC Backend": 3569 microseconds.
+Time taken for procedure "SCIP Backend": 3307 microseconds.
+Time taken for procedure "SAT Backend": 3957 microseconds.
+Time taken for procedure "CP-SAT Model": 5398 microseconds.
+./data/input/tree-75-74
+Time taken for procedure "I/O & Graph Initialization": 35 microseconds.
+Time taken for procedure "BOP Backend": 10402 microseconds.
+Time taken for procedure "CBC Backend": 4741 microseconds.
+Time taken for procedure "SCIP Backend": 4315 microseconds.
+Time taken for procedure "SAT Backend": 5461 microseconds.
+Time taken for procedure "CP-SAT Model": 7328 microseconds.
