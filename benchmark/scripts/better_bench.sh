@@ -28,11 +28,7 @@ if [ -z "$workdir" ]; then
     workdir="/"
 fi
 
-entrypoint=$(docker inspect --format='{{.Config.Entrypoint}}' "$image")
-entrypoint=${entrypoint:1:-1}
-if [ "$entrypoint" == "null" ]; then
-    entrypoint="[]"
-fi
+init_time=$(date +%s%3N)
 
 container_id=$(docker run -d -v "$bind1" -v "$bind2" --entrypoint "/bin/sh" "$image" -c "tail -f /dev/null")
 
@@ -40,13 +36,40 @@ if [ -z "$container_id" ]; then
     exit 2
 fi
 
+entrypoint_str=$(docker inspect --format='{{json .Config.Entrypoint}}' "$image")
+entrypoint=$(python -c "print( ' '.join( [e if '$' not in e else e.split(' ')[0] for e in $entrypoint_str if e not in ['/bin/sh', '-c']]) )")
+command="cd $workdir; $entrypoint $args"
+
+echo "ENTRYPOINT $entrypoint"
+echo "COMMAND $command"
+
 until [ "$(docker inspect --format '{{.State.Status}}' "$container_id")" == "running" ]; do
   :
 done
 
-/usr/bin/time -f "%e" -o temp_time.txt -- docker exec "$container_id" /bin/sh -c "cd $workdir; eval $entrypoint $args"
-echo "$image,$(cat temp_time.txt)" >> "$out_file".times.csv
-rm temp_time.txt
+start_time=$(date +%s%3N)
+timeout 300 docker exec "$container_id" /bin/sh -c "$command"
+end_time=$(date +%s%3N)
+
+time_ms_1=$((end_time - start_time))
+
+start_time=$(date +%s%3N)
+timeout 300 docker exec "$container_id" /bin/sh -c "$command"
+end_time=$(date +%s%3N)
+
+time_ms_2=$((end_time - start_time))
+
+start_time=$(date +%s%3N)
+timeout 300 docker exec "$container_id" /bin/sh -c "$command"
+end_time=$(date +%s%3N)
+
+time_ms_3=$((end_time - start_time))
 
 docker kill "$container_id" > /dev/null
 docker rm "$container_id" > /dev/null
+
+kill_time=$(date +%s%3N)
+
+proc_time_ms=$((kill_time - init_time))
+
+echo "$image,$proc_time_ms,$time_ms_1,$time_ms_2,$time_ms_3" | tee -a "$out_file".times.csv

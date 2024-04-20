@@ -1,21 +1,10 @@
-#!/bin/bash
-# runall.sh
+while IFS= read -r bench_name; do
+  echo "Started benchmark $bench_name...";
 
-if [ "$#" -lt 3 ]; then
-    echo "Usage: $0 <docker-image-file> <bind-1> <bind-2> <args...?>"
-    exit 1
-fi
+  while IFS= read -r image; do
+    echo "Measuring test $bench_name:$image";
+    ./benchmark/scripts/better_bench.sh ./benchmark/output/"$bench_name" "$image" ./data/input/:/input/ ./data/docker/:/output/ /input/"$bench_name" /output/tmp.out ;
+  done < ./benchmark/other/images
 
-image_file="$1"
-shift
-
-bind1="$1"
-shift
-
-bind2="$1"
-shift
-
-args=""
-for arg in "$@"; do
-    args+="'$arg' "
-done
+  echo "Done benchmark $bench_name...";
+done < ./benchmark/other/inputstr
