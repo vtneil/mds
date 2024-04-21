@@ -34,11 +34,8 @@ function(new_target target_name target_file)
 endfunction()
 
 # Targets
-new_target(hello hello.cpp)
 new_target(program main.cpp)
 new_target(baseline baseline.cpp)
-new_target(reference reference_exact.c)
 new_target(benchmark bench.cpp)
 new_target(naive naive.cpp)
-new_target(improved naive_impv.cpp)
 #new_target(test main.cpp ${omp_flag} "-DD1;-DD2;-DD3")
