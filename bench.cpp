@@ -3,10 +3,9 @@
 
 graph_t graph;
 edges_t sol;
-std::mutex mtx;
-std::condition_variable cv;
+std::atomic_bool solved(false);
 
-int main(const int argc, types::const_pointer_to_const<types::const_pointer_to_const<char> > argv) {
+int main(const int argc, char **argv) {
     if (argc < 2)
         return -1;
 
@@ -20,55 +19,59 @@ int main(const int argc, types::const_pointer_to_const<types::const_pointer_to_c
         read_graph_from_file(argv[1]);
     }, "I/O & Graph Initialization");
 
-    edges_t solutions[] = {
-        benchmark::run<1>([&]() {
+    using sol_t = std::pair<edges_t, std::string>;
+
+    sol_t solutions[] = {
+        benchmark::run<1>([&]() -> sol_t {
             operations_research::solve_mds<false>(
                 "BOP Solver",
                 operations_research::MPSolver::BOP_INTEGER_PROGRAMMING
             );
-            return edges_t(sol);
+            return {edges_t(sol), "BOP Solver"};
         }, "BOP Backend"),
 
-        benchmark::run<1>([&]() {
+        benchmark::run<1>([&]() -> sol_t {
             operations_research::solve_mds<false>(
                 "CBC Solver",
                 operations_research::MPSolver::CBC_MIXED_INTEGER_PROGRAMMING
             );
-            return edges_t(sol);
+            return {edges_t(sol), "CBC Solver"};
         }, "CBC Backend"),
 
-        benchmark::run<1>([&]() {
+        benchmark::run<1>([&]() -> sol_t {
             operations_research::solve_mds<false>(
                 "SCIP Solver",
                 operations_research::MPSolver::SCIP_MIXED_INTEGER_PROGRAMMING
             );
-            return edges_t(sol);
+            return {edges_t(sol), "SCIP Solver"};
         }, "SCIP Backend"),
 
-        benchmark::run<1>([&]() {
+        benchmark::run<1>([&]() -> sol_t {
             operations_research::solve_mds<false>(
                 "SAT Solver",
                 operations_research::MPSolver::SAT_INTEGER_PROGRAMMING
             );
-            return edges_t(sol);
+            return {edges_t(sol), "SAT Solver"};
         }, "SAT Backend"),
 
-        benchmark::run<1>([&]() {
+        benchmark::run<1>([&]() -> sol_t {
             operations_research::solve_mds_with_cp<false>(
                 "CP-SAT Solver"
             );
-            return edges_t(sol);
+            return {edges_t(sol), "CP-SAT Solver"};
         }, "CP-SAT Model"),
     };
 
-    // for (const auto &solution: solutions) {
-    //     size_t count = 0;
-    //     for (const vertex_t i: solution) count += i;
-    //     io::println("Smallest subset is ", count);
-    //
-    //     for (const vertex_t i: solution) io::print(i);
-    //     io::println();
-    // }
+    for (const auto &[solution, name]: solutions) {
+        io::println("Using ", name);
+        size_t count = 0;
+        for (const vertex_t i: solution) count += i;
+        io::println("Solution: ", count);
+
+        io::print("Solution: ");
+        for (const vertex_t i: solution) io::print(i);
+        io::println();
+    }
 
     return 0;
 }

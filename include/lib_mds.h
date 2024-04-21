@@ -48,7 +48,7 @@ inline void read_graph_from_file(types::const_pointer_to_const<char> filename) {
 }
 
 namespace operations_research {
-    template<bool with_lock = true>
+    template<bool mthread = true>
     void solve_mds(
         const char *solver_name,
         const MPSolver::OptimizationProblemType backend = MPSolver::CBC_MIXED_INTEGER_PROGRAMMING
@@ -82,15 +82,23 @@ namespace operations_research {
             objective.SetCoefficient(x[i], 1);
 
         // Solve
-        if (!solved && solver.Solve() == MPSolver::OPTIMAL) {
-            solved.store(true, std::memory_order_release);
-            sol.resize(n);
-            for (vertex_t i = 0; i < n; ++i)
-                sol[i] = static_cast<int>(x[i]->solution_value());
+        if constexpr (mthread) {
+            if (!solved && solver.Solve() == MPSolver::OPTIMAL) {
+                solved.store(true, std::memory_order_release);
+                sol.resize(n);
+                for (vertex_t i = 0; i < n; ++i)
+                    sol[i] = static_cast<int>(x[i]->solution_value());
+            }
+        } else {
+            if (solver.Solve() == MPSolver::OPTIMAL) {
+                sol.resize(n);
+                for (vertex_t i = 0; i < n; ++i)
+                    sol[i] = static_cast<int>(x[i]->solution_value());
+            }
         }
     }
 
-    template<bool with_lock = true>
+    template<bool mthread = true>
     void solve_mds_with_cp(
         const char *solver_name
     ) noexcept {
@@ -120,14 +128,25 @@ namespace operations_research {
         cp_model.Minimize(sat::LinearExpr::Sum(x));
 
         // Solve
-        if (const sat::CpSolverResponse response = sat::Solve(cp_model.Build());
-            !solved && (response.status() == sat::CpSolverStatus::OPTIMAL ||
-                        response.status() == sat::CpSolverStatus::FEASIBLE)
-        ) {
-            solved.store(true, std::memory_order_release);
-            sol.resize(n);
-            for (vertex_t i = 0; i < n; ++i)
-                sol[i] = sat::SolutionBooleanValue(response, x[i]);
+        if constexpr (mthread) {
+            if (const sat::CpSolverResponse response = sat::Solve(cp_model.Build());
+                !solved && (response.status() == sat::CpSolverStatus::OPTIMAL ||
+                            response.status() == sat::CpSolverStatus::FEASIBLE)
+            ) {
+                solved.store(true, std::memory_order_release);
+                sol.resize(n);
+                for (vertex_t i = 0; i < n; ++i)
+                    sol[i] = sat::SolutionBooleanValue(response, x[i]);
+            }
+        } else {
+            if (const sat::CpSolverResponse response = sat::Solve(cp_model.Build());
+                response.status() == sat::CpSolverStatus::OPTIMAL ||
+                response.status() == sat::CpSolverStatus::FEASIBLE
+            ) {
+                sol.resize(n);
+                for (vertex_t i = 0; i < n; ++i)
+                    sol[i] = sat::SolutionBooleanValue(response, x[i]);
+            }
         }
     }
 }

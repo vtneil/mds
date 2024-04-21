@@ -36,6 +36,14 @@ int main(const int argc, char **argv) {
         std::thread(
             operations_research::solve_mds_with_cp<true>, "CP-SAT Solver"
         ),
+        // std::thread(
+        //     operations_research::solve_mds<true>, "SCIP Solver",
+        //     operations_research::MPSolver::SCIP_MIXED_INTEGER_PROGRAMMING
+        // ),
+        // std::thread(
+        //     operations_research::solve_mds<true>, "SAT Solver",
+        //     operations_research::MPSolver::SAT_INTEGER_PROGRAMMING
+        // ),
     };
 
     // Wait for finish and detach threads
